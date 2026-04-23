@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { Home, LayoutDashboard, TrendingUp, TrendingDown, RepeatIcon } from 'lucide-react'
+import { Home, LayoutDashboard, TrendingUp, TrendingDown, HandCoins } from 'lucide-react'
 import clsx from 'clsx'
 
 const links = [
-  { to: '/',             label: 'Inicio',    icon: Home,            end: true },
-  { to: '/dashboard',    label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/ingresos',     label: 'Ingresos',  icon: TrendingUp },
-  { to: '/gastos',       label: 'Gastos',    icon: TrendingDown },
-  { to: '/gastos-fijos', label: 'Fijos',     icon: RepeatIcon },
+  { to: '/',          label: 'Inicio',     icon: Home,            end: true },
+  { to: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard, end: true },
+  { to: '/ingresos',  label: 'Ingresos',   icon: TrendingUp },
+  { to: '/gastos',    label: 'Gastos',     icon: TrendingDown },
+  { to: '/prestamos', label: 'Préstamos',  icon: HandCoins },
 ]
 
 export default function BottomNav() {

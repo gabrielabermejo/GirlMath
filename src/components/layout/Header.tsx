@@ -11,13 +11,16 @@ export default function Header({ title, subtitle }: Props) {
   const { profile, signOut } = useAuth()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
-    function handler(e: MouseEvent) {
+    function handler(e: MouseEvent | TouchEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('touchstart', handler)
+    return () => {
+      document.removeEventListener('mousedown', handler)
+      document.removeEventListener('touchstart', handler)
+    }
   }, [])
 
   const initials = profile?.full_name
@@ -45,7 +48,7 @@ export default function Header({ title, subtitle }: Props) {
           <span className="hidden sm:block text-sm text-gray-600 max-w-[120px] truncate">
             {profile?.full_name ?? 'Usuario'}
           </span>
-          <ChevronDown size={14} className="text-pink-300 hidden sm:block" />
+          <ChevronDown size={14} className="text-pink-300" />
         </button>
 
         {open && (
