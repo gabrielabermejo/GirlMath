@@ -22,10 +22,9 @@ export default function NotificationBell() {
     }
   }, [])
 
-  // Subscribe to OneSignal push notifications
-  useEffect(() => {
-    OneSignal.Slidedown.promptPush()
-  }, [])
+  async function requestPermission() {
+    await OneSignal.Slidedown.promptPush()
+  }
 
   function duLabel(days: number) {
     if (days === 0) return { text: 'Hoy', color: '#ef4444' }
@@ -37,7 +36,7 @@ export default function NotificationBell() {
   return (
     <div className="relative shrink-0" ref={ref}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => { setOpen((o) => !o); requestPermission() }}
         className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-pink-50 transition"
       >
         <Bell size={19} className="text-pink-400" />

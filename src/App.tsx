@@ -31,8 +31,8 @@ export default function App() {
     OneSignal.init({
       appId: '0c6a8d7d-ad27-483e-a9bf-ef1a73dc3baf',
       allowLocalhostAsSecureOrigin: true,
-    }).then(() => {
-      OneSignal.Slidedown.promptPush()
+      serviceWorkerParam: { scope: '/' },
+      serviceWorkerPath: 'OneSignalSDKWorker.js',
     })
   }, [])
 
