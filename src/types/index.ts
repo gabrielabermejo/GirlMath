@@ -43,6 +43,7 @@ export interface Income {
   date: string
   description: string
   category: string | null
+  bank_account_id: string | null
   created_at: string
 }
 
@@ -88,6 +89,15 @@ export interface FixedExpense {
   description: string
   category: ExpenseCategory
   day_of_month: number | null
+  created_at: string
+}
+
+export interface BankAccount {
+  id: string
+  user_id: string
+  name: string
+  bank: string
+  color: string
   created_at: string
 }
 

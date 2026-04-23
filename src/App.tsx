@@ -13,6 +13,7 @@ import IncomePage from './modules/income/IncomePage'
 import ExpensesPage from './modules/expenses/ExpensesPage'
 import FixedExpensesPage from './modules/fixed-expenses/FixedExpensesPage'
 import LoansPage from './modules/loans/LoansPage'
+import BankAccountsPage from './modules/bank-accounts/BankAccountsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="gastos" element={<ExpensesPage />} />
                 <Route path="gastos-fijos" element={<FixedExpensesPage />} />
                 <Route path="prestamos" element={<LoansPage />} />
+                <Route path="cuentas" element={<BankAccountsPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

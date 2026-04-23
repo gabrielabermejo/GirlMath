@@ -127,6 +127,30 @@ create policy "fixed_expenses: delete own" on public.fixed_expenses
   for delete using ( auth.uid() = user_id );
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- TABLE: bank_accounts
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.bank_accounts (
+  id         uuid primary key default uuid_generate_v4(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  name       text not null,
+  bank       text not null,
+  color      text not null default '#f9a8d4',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists bank_accounts_user_id_idx on public.bank_accounts (user_id);
+
+alter table public.bank_accounts enable row level security;
+
+create policy "bank_accounts: select own" on public.bank_accounts for select using ( auth.uid() = user_id );
+create policy "bank_accounts: insert own" on public.bank_accounts for insert with check ( auth.uid() = user_id );
+create policy "bank_accounts: update own" on public.bank_accounts for update using ( auth.uid() = user_id );
+create policy "bank_accounts: delete own" on public.bank_accounts for delete using ( auth.uid() = user_id );
+
+-- Add bank_account_id to incomes
+alter table public.incomes add column if not exists bank_account_id uuid references public.bank_accounts(id) on delete set null;
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- TABLE: loans
 -- ─────────────────────────────────────────────────────────────────────────────
 create table if not exists public.loans (
