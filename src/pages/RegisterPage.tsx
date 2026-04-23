@@ -29,7 +29,7 @@ export default function RegisterPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   async function onSubmit(values: FormValues) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: { data: { full_name: values.full_name } },
@@ -38,18 +38,24 @@ export default function RegisterPage() {
       toast.error(error.message)
       return
     }
-    // Sign in immediately after registration (email confirmation disabled in Supabase)
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
-    })
-    if (signInError) {
-      toast.success('¡Cuenta creada! Inicia sesión.')
-      navigate('/login')
-      return
+    if (data.session) {
+      // Email confirmation is disabled — session ready immediately
+      toast.success('¡Bienvenida! 🎀')
+      navigate('/')
+    } else {
+      // Fallback: try signing in manually
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      })
+      if (signInError) {
+        toast.error('Cuenta creada pero no se pudo iniciar sesión. Intenta de nuevo.')
+        navigate('/login')
+        return
+      }
+      toast.success('¡Bienvenida! 🎀')
+      navigate('/')
     }
-    toast.success('¡Bienvenida! 🎀')
-    navigate('/')
   }
 
   return (
