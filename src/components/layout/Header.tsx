@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { LogOut, ChevronDown } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import NotificationBell from '../ui/NotificationBell'
 
 interface Props {
   title: string
@@ -36,8 +37,11 @@ export default function Header({ title, subtitle }: Props) {
         </div>
       </div>
 
+      <div className="flex items-center gap-1 shrink-0">
+        <NotificationBell />
+
       {/* User menu */}
-      <div className="relative shrink-0" ref={ref}>
+      <div className="relative" ref={ref}>
         <button
           onClick={() => setOpen((o) => !o)}
           className="flex items-center gap-2 rounded-xl px-2 md:px-3 py-1.5 hover:bg-pink-50 transition"
@@ -62,6 +66,7 @@ export default function Header({ title, subtitle }: Props) {
             </button>
           </div>
         )}
+      </div>
       </div>
     </header>
   )
