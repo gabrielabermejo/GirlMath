@@ -30,8 +30,6 @@ export default function App() {
   useEffect(() => {
     OneSignal.init({
       appId: '0c6a8d7d-ad27-483e-a9bf-ef1a73dc3baf',
-      safari_web_id: 'web.onesignal.auto.0c6a8d7d-ad27-483e-a9bf-ef1a73dc3baf',
-      notifyButton: { enable: false },
       allowLocalhostAsSecureOrigin: true,
     })
   }, [])
