@@ -7,13 +7,13 @@ import {
 import clsx from 'clsx'
 
 const links = [
-  { to: '/',             label: 'Inicio',        icon: Home,            end: true },
-  { to: '/dashboard',    label: 'Dashboard',     icon: LayoutDashboard, end: true },
-  { to: '/ingresos',     label: 'Ingresos',      icon: TrendingUp },
-  { to: '/gastos',       label: 'Gastos',        icon: TrendingDown },
-  { to: '/gastos-fijos', label: 'Gastos fijos',  icon: RepeatIcon },
-  { to: '/prestamos',    label: 'Préstamos',     icon: HandCoins },
-  { to: '/cuentas',      label: 'Cuentas',       icon: Landmark },
+  { to: '/',             label: 'Inicio',       icon: Home,            end: true,  color: '#f9a8d4', bg: '#fdf2f8' },
+  { to: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard, end: true,  color: '#c084fc', bg: '#faf5ff' },
+  { to: '/ingresos',    label: 'Ingresos',     icon: TrendingUp,      end: false, color: '#34d399', bg: '#f0fdf4' },
+  { to: '/gastos',      label: 'Gastos',       icon: TrendingDown,    end: false, color: '#fb7185', bg: '#fff1f2' },
+  { to: '/gastos-fijos',label: 'Gastos fijos', icon: RepeatIcon,      end: false, color: '#a78bfa', bg: '#f5f3ff' },
+  { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: '#fffbeb' },
+  { to: '/cuentas',     label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: '#eff6ff' },
 ]
 
 export default function MobileMenu() {
@@ -21,80 +21,107 @@ export default function MobileMenu() {
 
   return (
     <>
-      {/* Bottom bar with hamburger button */}
-      <div className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-between border-t border-pink-100 bg-white/95 backdrop-blur-sm px-5"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 12px)', paddingTop: '10px' }}
+      {/* Bottom bar */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-between px-5 border-t border-pink-100/80"
+        style={{
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 14px)',
+          paddingTop: '12px',
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}
       >
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-violet-300">
-            <Sparkles size={13} className="text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-violet-300 shadow-sm shadow-pink-200">
+            <Sparkles size={14} className="text-white" />
           </div>
-          <span className="text-sm font-bold bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent">
-            GirlMath
+          <span className="text-base font-bold bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent">
+            GirlMath 🎀
           </span>
         </div>
+
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center justify-center h-10 w-10 rounded-xl bg-pink-50 text-pink-500 hover:bg-pink-100 transition"
+          className="flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-semibold transition"
+          style={{ background: 'linear-gradient(135deg, #ec4899, #a855f7)', color: 'white', boxShadow: '0 4px 14px rgba(236,72,153,0.3)' }}
         >
-          <Menu size={22} />
+          <Menu size={18} />
+          Menú
         </button>
       </div>
 
       {/* Backdrop */}
-      {open && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      {/* Drawer slide-up */}
       <div
         className={clsx(
-          'md:hidden fixed inset-x-0 bottom-0 z-50 rounded-t-3xl bg-white transition-transform duration-300',
+          'md:hidden fixed inset-0 z-40 transition-opacity duration-300',
+          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* Drawer */}
+      <div
+        className={clsx(
+          'md:hidden fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out',
           open ? 'translate-y-0' : 'translate-y-full'
         )}
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
+        style={{
+          borderRadius: '28px 28px 0 0',
+          background: 'linear-gradient(160deg, #fff5f9 0%, #fdf4ff 100%)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
+          boxShadow: '0 -8px 40px rgba(236,72,153,0.15)',
+        }}
       >
         {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-pink-200" />
+        <div className="flex justify-center pt-4 pb-2">
+          <div className="h-1.5 w-12 rounded-full bg-pink-200" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-pink-50">
-          <span className="text-sm font-semibold text-gray-700">Módulos</span>
+        <div className="flex items-center justify-between px-6 pb-4">
+          <div>
+            <p className="text-lg font-bold text-gray-800">Módulos</p>
+            <p className="text-xs text-pink-400">¿A dónde quieres ir?</p>
+          </div>
           <button
             onClick={() => setOpen(false)}
-            className="flex items-center justify-center h-8 w-8 rounded-xl bg-pink-50 text-pink-400 hover:bg-pink-100 transition"
+            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-pink-400 shadow-sm border border-pink-100"
           >
-            <X size={16} />
+            <X size={17} />
           </button>
         </div>
 
-        {/* Links */}
-        <nav className="p-4 grid grid-cols-2 gap-2">
-          {links.map(({ to, label, icon: Icon, end }) => (
+        {/* Grid */}
+        <nav className="px-4 grid grid-cols-2 gap-3">
+          {links.map(({ to, label, icon: Icon, end, color, bg }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                clsx(
-                  'flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-medium transition',
-                  isActive
-                    ? 'bg-pink-50 text-pink-500 shadow-sm'
-                    : 'text-gray-500 hover:bg-pink-50/60 hover:text-pink-400',
-                )
-              }
+              className="block"
             >
               {({ isActive }) => (
-                <>
-                  <Icon size={18} className={isActive ? 'text-pink-400' : 'text-gray-400'} />
-                  {label}
-                </>
+                <div
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all"
+                  style={{
+                    background: isActive ? bg : 'white',
+                    border: `1.5px solid ${isActive ? color + '60' : '#fce7f3'}`,
+                    boxShadow: isActive ? `0 4px 16px ${color}25` : '0 1px 4px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: bg, border: `1.5px solid ${color}40` }}
+                  >
+                    <Icon size={17} style={{ color }} />
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: isActive ? color : '#374151' }}>
+                    {label}
+                  </span>
+                </div>
               )}
             </NavLink>
           ))}
