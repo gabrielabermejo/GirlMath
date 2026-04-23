@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import Header from '../../components/layout/Header'
-import StatCard from '../../components/ui/StatCard'
 import ExpensePieChart from './components/ExpensePieChart'
 import BalanceLineChart from './components/BalanceLineChart'
 import BudgetAlertModal from './components/BudgetAlertModal'
@@ -87,8 +86,6 @@ export default function DashboardPage() {
       })
     }
   }, [user, qc])
-
-  const balanceVariant = balance >= 0 ? 'balance-positive' : 'balance-negative'
 
   const availableBudget = totalIncome - savings.goalAmount
   const spentPct = availableBudget > 0 ? (savings.totalSpent / availableBudget) * 100 : 0
@@ -205,33 +202,67 @@ export default function DashboardPage() {
         })()}
 
         {/* Main stat cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Balance del mes"
-            value={formatCurrency(balance)}
-            subtext={balance >= 0 ? 'Saldo positivo ✓' : 'Saldo negativo'}
-            icon={<Wallet size={18} className="text-white" />}
-            variant={balanceVariant}
-          />
-          <StatCard
-            label="Ingresos"
-            value={formatCurrency(totalIncome)}
-            icon={<TrendingUp size={18} className="text-emerald-600" />}
-            variant="income"
-          />
-          <StatCard
-            label="Gastos variables"
-            value={formatCurrency(totalVariableExpenses)}
-            icon={<TrendingDown size={18} className="text-pink-400" />}
-            variant="expense"
-          />
-          <StatCard
-            label="Gastos fijos"
-            value={formatCurrency(totalFixedExpenses)}
-            subtext="Recurrentes mensuales"
-            icon={<RepeatIcon size={18} className="text-violet-600" />}
-            variant="default"
-          />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {/* Balance */}
+          <div
+            className="rounded-2xl border p-4 shadow-sm"
+            style={{
+              background: balance >= 0 ? '#f0fdf4' : '#fff1f2',
+              borderColor: balance >= 0 ? '#bbf7d0' : '#fecdd3',
+            }}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-400">Balance</p>
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-xl"
+                style={{ background: balance >= 0 ? '#dcfce7' : '#ffe4e6' }}
+              >
+                <Wallet size={14} style={{ color: balance >= 0 ? '#16a34a' : '#e11d48' }} />
+              </div>
+            </div>
+            <p className="text-base font-bold truncate" style={{ color: balance >= 0 ? '#16a34a' : '#e11d48' }}>
+              {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: balance >= 0 ? '#86efac' : '#fca5a5' }}>
+              {balance >= 0 ? 'Saldo positivo ✓' : 'Saldo negativo'}
+            </p>
+          </div>
+
+          {/* Ingresos */}
+          <div className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-400">Ingresos</p>
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-green-50">
+                <TrendingUp size={14} className="text-green-500" />
+              </div>
+            </div>
+            <p className="text-base font-bold text-green-500 truncate">{formatCurrency(totalIncome)}</p>
+            <p className="text-xs text-gray-300 mt-0.5">Este mes</p>
+          </div>
+
+          {/* Gastos variables */}
+          <div className="rounded-2xl border border-pink-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-400">Gastos var.</p>
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-pink-50">
+                <TrendingDown size={14} className="text-pink-400" />
+              </div>
+            </div>
+            <p className="text-base font-bold text-pink-500 truncate">{formatCurrency(totalVariableExpenses)}</p>
+            <p className="text-xs text-gray-300 mt-0.5">Variables</p>
+          </div>
+
+          {/* Gastos fijos */}
+          <div className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-gray-400">Gastos fijos</p>
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-violet-50">
+                <RepeatIcon size={14} className="text-violet-400" />
+              </div>
+            </div>
+            <p className="text-base font-bold text-violet-500 truncate">{formatCurrency(totalFixedExpenses)}</p>
+            <p className="text-xs text-gray-300 mt-0.5">Recurrentes</p>
+          </div>
         </div>
 
         {/* Savings card */}
