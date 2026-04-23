@@ -25,7 +25,7 @@ export default function MobileMenu() {
       <div
         className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-between px-5 border-t border-pink-100/80"
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 14px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 30px)',
           paddingTop: '12px',
           background: 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(16px)',
