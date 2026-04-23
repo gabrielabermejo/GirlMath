@@ -38,12 +38,11 @@ export default function RegisterPage() {
       toast.error(error.message)
       return
     }
-    if (data.session) {
-      // Email confirmation is disabled — session ready immediately
-      toast.success('¡Bienvenida! 🎀')
-      navigate('/')
-    } else {
-      // Fallback: try signing in manually
+    const session = data.session
+    const userId = data.user?.id
+
+    // If no session, try signing in manually
+    if (!session) {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
@@ -53,9 +52,18 @@ export default function RegisterPage() {
         navigate('/login')
         return
       }
-      toast.success('¡Bienvenida! 🎀')
-      navigate('/')
     }
+
+    // Ensure profile exists (fallback if DB trigger didn't run)
+    if (userId) {
+      await supabase.from('profiles').upsert({
+        id: userId,
+        full_name: values.full_name,
+      }, { onConflict: 'id' })
+    }
+
+    toast.success('¡Bienvenida! 🎀')
+    navigate('/')
   }
 
   return (
