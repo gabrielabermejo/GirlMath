@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import Modal from '../components/ui/Modal'
 import IncomeForm from '../modules/income/components/IncomeForm'
 import ExpenseForm from '../modules/expenses/components/ExpenseForm'
+import NotificationBell from '../components/ui/NotificationBell'
 
 export default function HomePage() {
   const { profile } = useAuth()
@@ -13,7 +14,12 @@ export default function HomePage() {
   const firstName = profile?.full_name?.split(' ')[0] ?? 'hola'
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-5 md:p-8">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-5 md:p-8 relative">
+      {/* Notification bell */}
+      <div className="absolute top-0 right-0 p-2">
+        <NotificationBell />
+      </div>
+
       {/* Greeting */}
       <div className="mb-12 text-center">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-pink-300 to-violet-200 shadow-lg shadow-pink-100 mb-4">
