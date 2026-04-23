@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { Home, LayoutDashboard, TrendingUp, TrendingDown, HandCoins } from 'lucide-react'
+import { Home, LayoutDashboard, TrendingUp, TrendingDown, HandCoins, RepeatIcon } from 'lucide-react'
 import clsx from 'clsx'
 
 const links = [
-  { to: '/',          label: 'Inicio',     icon: Home,            end: true },
-  { to: '/dashboard', label: 'Dashboard',  icon: LayoutDashboard, end: true },
-  { to: '/ingresos',  label: 'Ingresos',   icon: TrendingUp },
-  { to: '/gastos',    label: 'Gastos',     icon: TrendingDown },
-  { to: '/prestamos', label: 'Préstamos',  icon: HandCoins },
+  { to: '/',            label: 'Inicio',    icon: Home,            end: true },
+  { to: '/dashboard',   label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/ingresos',    label: 'Ingresos',  icon: TrendingUp },
+  { to: '/gastos',      label: 'Gastos',    icon: TrendingDown },
+  { to: '/gastos-fijos',label: 'Fijos',     icon: RepeatIcon },
+  { to: '/prestamos',   label: 'Préstamos', icon: HandCoins },
 ]
 
 export default function BottomNav() {
@@ -20,14 +21,14 @@ export default function BottomNav() {
           end={end}
           className={({ isActive }) =>
             clsx(
-              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition',
+              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[9px] font-medium transition',
               isActive ? 'text-pink-500' : 'text-gray-400',
             )
           }
         >
           {({ isActive }) => (
             <>
-              <Icon size={20} className={isActive ? 'text-pink-400' : 'text-gray-300'} />
+              <Icon size={18} className={isActive ? 'text-pink-400' : 'text-gray-300'} />
               <span>{label}</span>
             </>
           )}
