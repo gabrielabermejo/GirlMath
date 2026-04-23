@@ -28,7 +28,14 @@ export default function LoginPage() {
   async function onSubmit(values: FormValues) {
     const { error } = await supabase.auth.signInWithPassword(values)
     if (error) {
-      toast.error('Credenciales incorrectas')
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        // Confirm email is still ON in Supabase — force-confirm via OTP workaround
+        toast.error('Debes confirmar tu email antes de iniciar sesión. Revisa tu bandeja de entrada.')
+      } else if (error.message.toLowerCase().includes('invalid login credentials') || error.message.toLowerCase().includes('invalid credentials')) {
+        toast.error('Email o contraseña incorrectos')
+      } else {
+        toast.error(error.message)
+      }
       return
     }
     navigate('/')
