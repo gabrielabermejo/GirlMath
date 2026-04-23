@@ -2,9 +2,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase, isDemo } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
-import { Sparkles, FlaskConical } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -13,15 +13,12 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-const DEMO_EMAIL = 'demo@budget.com'
-const DEMO_PASSWORD = 'demo123'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -41,10 +38,6 @@ export default function LoginPage() {
     navigate('/')
   }
 
-  function fillDemo() {
-    setValue('email', DEMO_EMAIL)
-    setValue('password', DEMO_PASSWORD)
-  }
 
   const stars = [
     { top: '8%',  left: '12%', size: 6,  delay: '0s',   dur: '2.2s' },
@@ -159,29 +152,6 @@ export default function LoginPage() {
             boxShadow: '0 20px 60px rgba(236, 72, 153, 0.2), 0 4px 16px rgba(192,132,252,0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
           }}
         >
-          {isDemo && (
-            <div className="mb-5 rounded-xl border border-pink-200 bg-pink-50 p-3">
-              <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-pink-600">
-                <FlaskConical size={13} />
-                Modo demo — sin Supabase real
-              </div>
-              <p className="mb-2 text-xs text-pink-500">
-                Los datos se guardan en <strong>localStorage</strong>.
-              </p>
-              <div className="mb-2 rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-pink-700 border border-pink-100">
-                <span className="text-pink-400">email</span> {DEMO_EMAIL}<br />
-                <span className="text-pink-400">pass&nbsp;&nbsp;</span> {DEMO_PASSWORD}
-              </div>
-              <button
-                type="button"
-                onClick={fillDemo}
-                className="w-full rounded-lg bg-pink-500 py-1.5 text-xs font-medium text-white hover:bg-pink-600 transition"
-              >
-                Usar credenciales demo
-              </button>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="label">Email</label>
