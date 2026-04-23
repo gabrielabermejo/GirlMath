@@ -33,6 +33,21 @@ export default function App() {
       allowLocalhostAsSecureOrigin: true,
       serviceWorkerParam: { scope: '/' },
       serviceWorkerPath: 'OneSignalSDKWorker.js',
+    }).then(() => {
+      // Listen for subscription changes and save player_id
+      OneSignal.User.PushSubscription.addEventListener('change', async (event) => {
+        const playerId = event.current.id
+        if (!playerId) return
+        const { data: { session } } = await import('./lib/supabase').then(m =>
+          m.supabase.auth.getSession()
+        )
+        if (!session?.user) return
+        const { supabase } = await import('./lib/supabase')
+        await supabase.from('push_subscriptions').upsert(
+          { user_id: session.user.id, player_id: playerId },
+          { onConflict: 'user_id' }
+        )
+      })
     })
   }, [])
 

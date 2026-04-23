@@ -6,7 +6,6 @@ import {
   ReactNode,
 } from 'react'
 import { User } from '@supabase/supabase-js'
-import OneSignal from 'react-onesignal'
 import { supabase } from '../lib/supabase'
 import { Profile } from '../types'
 
@@ -33,23 +32,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data)
   }
 
-  async function savePushSubscription(userId: string) {
-    try {
-      const playerId = await OneSignal.User.PushSubscription.id
-      if (!playerId) return
-      await supabase.from('push_subscriptions').upsert(
-        { user_id: userId, player_id: playerId },
-        { onConflict: 'user_id' }
-      )
-    } catch (_) {}
-  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id).finally(() => setIsLoading(false))
-        savePushSubscription(session.user.id)
       } else {
         setIsLoading(false)
       }
