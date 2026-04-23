@@ -13,7 +13,7 @@ const links = [
 
 export default function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-stretch border-t border-pink-100 bg-white/95 backdrop-blur-sm safe-area-pb">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-stretch border-t border-pink-100 bg-white/95 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {links.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}

@@ -5,14 +5,14 @@ import { SidebarProvider } from '../../context/SidebarContext'
 
 function Layout() {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex overflow-hidden" style={{ height: '100dvh' }}>
       {/* Sidebar — desktop only */}
       <div className="hidden md:flex h-full shrink-0">
         <Sidebar />
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <main className="flex-1 overflow-y-auto pb-24 md:pb-0">
+        <main className="flex-1 overflow-y-auto md:pb-0" style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
           <Outlet />
         </main>
       </div>
