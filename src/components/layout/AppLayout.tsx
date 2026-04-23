@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import BottomNav from './BottomNav'
+import MobileMenu from './MobileMenu'
 import { SidebarProvider } from '../../context/SidebarContext'
 
 function Layout() {
@@ -17,8 +17,8 @@ function Layout() {
         </main>
       </div>
 
-      {/* Bottom nav — mobile only */}
-      <BottomNav />
+      {/* Mobile menu — mobile only */}
+      <MobileMenu />
     </div>
   )
 }
