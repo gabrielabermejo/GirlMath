@@ -13,7 +13,7 @@ export default defineConfig({
         short_name: 'GirlMath',
         description: 'Tu presupuesto personal',
         theme_color: '#ec4899',
-        background_color: '#fdf2f8',
+        background_color: '#fce7f3',
         display: 'standalone',
         start_url: '/',
         icons: [
