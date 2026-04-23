@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, RepeatIcon } from 'lucide-react'
+import OneSignal from 'react-onesignal'
 import { useUpcomingFixedExpenses } from '../../hooks/useUpcomingFixedExpenses'
 import { formatCurrency } from '../../lib/utils'
 
@@ -21,25 +22,9 @@ export default function NotificationBell() {
     }
   }, [])
 
-  // Request browser notification permission and fire notifications
+  // Subscribe to OneSignal push notifications
   useEffect(() => {
-    if (!('Notification' in window) || upcoming.length === 0) return
-    if (Notification.permission === 'default') {
-      Notification.requestPermission()
-    }
-    if (Notification.permission === 'granted') {
-      upcoming
-        .filter((e) => e.daysUntilDue <= 3)
-        .forEach((e) => {
-          const label = e.daysUntilDue === 0 ? 'hoy' : e.daysUntilDue === 1 ? 'mañana' : `en ${e.daysUntilDue} días`
-          new Notification(`💸 Gasto fijo vence ${label}`, {
-            body: `${e.description} — ${formatCurrency(e.amount)}`,
-            icon: '/icon-192.svg',
-          })
-        })
-    }
-  // Only fire once on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    OneSignal.Slidedown.promptPush()
   }, [])
 
   function duLabel(days: number) {

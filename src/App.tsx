@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import OneSignal from 'react-onesignal'
+import { useEffect } from 'react'
 import { AuthProvider } from './context/AuthContext'
 import { FiltersProvider } from './context/FiltersContext'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -25,6 +27,15 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
+  useEffect(() => {
+    OneSignal.init({
+      appId: '0c6a8d7d-ad27-483e-a9bf-ef1a73dc3baf',
+      safari_web_id: 'web.onesignal.auto.0c6a8d7d-ad27-483e-a9bf-ef1a73dc3baf',
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+    })
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
