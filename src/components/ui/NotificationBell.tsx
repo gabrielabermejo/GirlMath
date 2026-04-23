@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, RepeatIcon } from 'lucide-react'
+import { Bell, RepeatIcon, BellOff } from 'lucide-react'
 import OneSignal from 'react-onesignal'
 import { useUpcomingFixedExpenses } from '../../hooks/useUpcomingFixedExpenses'
 import { formatCurrency } from '../../lib/utils'
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false)
+  const [permissionState, setPermissionState] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  )
   const ref = useRef<HTMLDivElement>(null)
   const upcoming = useUpcomingFixedExpenses(7)
 
@@ -23,7 +26,15 @@ export default function NotificationBell() {
   }, [])
 
   async function requestPermission() {
-    await OneSignal.Slidedown.promptPush()
+    if (typeof Notification === 'undefined') return
+    if (Notification.permission === 'denied') return
+    if (Notification.permission !== 'granted') {
+      const result = await Notification.requestPermission()
+      setPermissionState(result)
+      if (result === 'granted') {
+        await OneSignal.User.PushSubscription.optIn()
+      }
+    }
   }
 
   function duLabel(days: number) {
@@ -36,7 +47,7 @@ export default function NotificationBell() {
   return (
     <div className="relative shrink-0" ref={ref}>
       <button
-        onClick={() => { setOpen((o) => !o); requestPermission() }}
+        onClick={() => setOpen((o) => !o)}
         className="relative flex h-9 w-9 items-center justify-center rounded-xl hover:bg-pink-50 transition"
       >
         <Bell size={19} className="text-pink-400" />
@@ -53,6 +64,25 @@ export default function NotificationBell() {
             <p className="text-sm font-semibold text-gray-700">Gastos fijos próximos</p>
             <span className="text-xs text-pink-400">7 días</span>
           </div>
+
+          {permissionState !== 'granted' && permissionState !== 'denied' && (
+            <div className="px-4 py-3 border-b border-pink-50 bg-pink-50/60">
+              <p className="text-xs text-gray-500 mb-2">Activa las notificaciones para recibir alertas en tu celular</p>
+              <button
+                onClick={requestPermission}
+                className="w-full rounded-xl bg-pink-500 py-2 text-xs font-semibold text-white hover:bg-pink-600 transition"
+              >
+                Activar notificaciones
+              </button>
+            </div>
+          )}
+
+          {permissionState === 'denied' && (
+            <div className="flex flex-col items-center justify-center gap-1 px-4 py-3 border-b border-pink-50 bg-gray-50">
+              <BellOff size={16} className="text-gray-400" />
+              <p className="text-xs text-gray-400 text-center">Notificaciones bloqueadas. Actívalas desde la configuración del navegador.</p>
+            </div>
+          )}
 
           {upcoming.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-400">
