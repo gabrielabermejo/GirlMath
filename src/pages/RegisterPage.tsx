@@ -38,8 +38,18 @@ export default function RegisterPage() {
       toast.error(error.message)
       return
     }
-    toast.success('¡Cuenta creada! Revisa tu email para confirmar.')
-    navigate('/login')
+    // Sign in immediately after registration (email confirmation disabled in Supabase)
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    })
+    if (signInError) {
+      toast.success('¡Cuenta creada! Inicia sesión.')
+      navigate('/login')
+      return
+    }
+    toast.success('¡Bienvenida! 🎀')
+    navigate('/')
   }
 
   return (
