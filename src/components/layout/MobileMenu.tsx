@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
-  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles
+  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown
 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -13,7 +13,8 @@ const links = [
   { to: '/gastos',      label: 'Gastos',       icon: TrendingDown,    end: false, color: '#fb7185', bg: '#fff1f2' },
   { to: '/gastos-fijos',label: 'Gastos fijos', icon: RepeatIcon,      end: false, color: '#a78bfa', bg: '#f5f3ff' },
   { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: '#fffbeb' },
-  { to: '/cuentas',     label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: '#eff6ff' },
+  { to: '/cuentas',      label: 'Cuentas',      icon: Landmark,       end: false, color: '#60a5fa', bg: '#eff6ff' },
+  { to: '/movimientos',  label: 'Movimientos',  icon: ArrowUpDown,    end: false, color: '#f472b6', bg: '#fdf2f8' },
 ]
 
 export default function MobileMenu() {

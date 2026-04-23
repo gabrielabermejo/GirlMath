@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, LayoutDashboard, TrendingUp, TrendingDown, Sparkles, RepeatIcon, LogOut, HandCoins, Landmark } from 'lucide-react'
+import { Home, LayoutDashboard, TrendingUp, TrendingDown, Sparkles, RepeatIcon, LogOut, HandCoins, Landmark, ArrowUpDown } from 'lucide-react'
 import clsx from 'clsx'
 import { useSidebar } from '../../context/SidebarContext'
 import { useAuth } from '../../context/AuthContext'
@@ -11,7 +11,8 @@ const links = [
   { to: '/gastos',       label: 'Gastos',       icon: TrendingDown },
   { to: '/gastos-fijos', label: 'Gastos fijos', icon: RepeatIcon },
   { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins },
-  { to: '/cuentas',     label: 'Cuentas',      icon: Landmark },
+  { to: '/cuentas',      label: 'Cuentas',       icon: Landmark },
+  { to: '/movimientos',  label: 'Movimientos',   icon: ArrowUpDown },
 ]
 
 export default function Sidebar() {
