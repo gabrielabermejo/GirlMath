@@ -13,7 +13,7 @@ const links = [
 
 export default function BottomNav() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-stretch border-t border-pink-100 bg-white/95 backdrop-blur-sm" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-stretch border-t border-pink-100 bg-white/95 backdrop-blur-sm" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 12px)', marginBottom: 0 }}>
       {links.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
@@ -21,7 +21,7 @@ export default function BottomNav() {
           end={end}
           className={({ isActive }) =>
             clsx(
-              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[9px] font-medium transition',
+              'flex flex-1 flex-col items-center justify-center gap-1 py-4 text-[9px] font-medium transition',
               isActive ? 'text-pink-500' : 'text-gray-400',
             )
           }
