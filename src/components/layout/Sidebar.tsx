@@ -40,12 +40,13 @@ export default function Sidebar() {
             onClick={close}
             className={({ isActive }) =>
               clsx(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium',
                 isActive
                   ? 'bg-pink-50 text-pink-500 shadow-sm'
-                  : 'text-gray-400 hover:bg-pink-50/60 hover:text-pink-400',
+                  : 'text-gray-400 hover:bg-pink-50/60 hover:text-pink-400 active:scale-[0.98]',
               )
             }
+            style={{ transition: 'background 0.15s ease, color 0.15s ease, transform 0.1s ease' }}
           >
             {({ isActive }) => (
               <>

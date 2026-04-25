@@ -61,14 +61,14 @@ export default function MobileMenu() {
           'md:hidden fixed inset-0 z-40 transition-opacity duration-300',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
-        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', transition: 'opacity 0.25s ease' }}
         onClick={() => setOpen(false)}
       />
 
       {/* Drawer */}
       <div
         className={clsx(
-          'md:hidden fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out',
+          'md:hidden fixed inset-x-0 bottom-0 z-50',
           open ? 'translate-y-0' : 'translate-y-full'
         )}
         style={{
@@ -76,6 +76,7 @@ export default function MobileMenu() {
           background: 'linear-gradient(160deg, #fff5f9 0%, #fdf4ff 100%)',
           paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
           boxShadow: '0 -8px 40px rgba(236,72,153,0.15)',
+          transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
         }}
       >
         {/* Handle */}
@@ -99,21 +100,23 @@ export default function MobileMenu() {
 
         {/* Grid */}
         <nav className="px-4 grid grid-cols-2 gap-3">
-          {[...links, ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: '#f5f3ff' }] : [])].map(({ to, label, icon: Icon, end, color, bg }) => (
+          {[...links, ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: '#f5f3ff' }] : [])].map(({ to, label, icon: Icon, end, color, bg }, idx) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               onClick={() => setOpen(false)}
-              className="block"
+              className="block list-item-enter"
+              style={{ animationDelay: `${idx * 35}ms` }}
             >
               {({ isActive }) => (
                 <div
-                  className="flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all"
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3.5 active:scale-[0.97]"
                   style={{
                     background: isActive ? bg : 'white',
                     border: `1.5px solid ${isActive ? color + '60' : '#fce7f3'}`,
                     boxShadow: isActive ? `0 4px 16px ${color}25` : '0 1px 4px rgba(0,0,0,0.04)',
+                    transition: 'background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
                   }}
                 >
                   <div

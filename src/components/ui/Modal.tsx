@@ -19,30 +19,35 @@ const sizes = {
 export default function Modal({ isOpen, onClose, title, children, size = 'md' }: Props) {
   useEffect(() => {
     if (!isOpen) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
+    document.body.style.overflow = 'hidden'
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', handler)
+    }
   }, [isOpen, onClose])
 
   if (!isOpen) return null
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="fade-in absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
+      {/* Panel */}
       <div
-        className={`card relative w-full ${sizes[size]} p-6 shadow-xl`}
+        className={`modal-enter card relative w-full ${sizes[size]} p-6 shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-xl p-1.5 text-gray-400 transition hover:bg-pink-50 hover:text-pink-400 active:scale-90"
+            style={{ transition: 'all 0.15s ease' }}
           >
             <X size={18} />
           </button>
