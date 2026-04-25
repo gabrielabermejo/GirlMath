@@ -17,6 +17,7 @@ import FixedExpensesPage from './modules/fixed-expenses/FixedExpensesPage'
 import LoansPage from './modules/loans/LoansPage'
 import BankAccountsPage from './modules/bank-accounts/BankAccountsPage'
 import MovimientosPage from './modules/movimientos/MovimientosPage'
+import CalendarioPage from './modules/calendario/CalendarioPage'
 import AdminPage from './modules/admin/AdminPage'
 import PendingPage from './pages/PendingPage'
 
@@ -81,6 +82,7 @@ export default function App() {
                 <Route path="cuentas" element={<BankAccountsPage />} />
                 <Route path="movimientos" element={<MovimientosPage />} />
                 <Route path="admin" element={<AdminPage />} />
+                <Route path="calendario" element={<CalendarioPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
-  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown, ShieldCheck
+  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown, ShieldCheck, CalendarDays
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -16,6 +16,7 @@ const links = [
   { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: '#fffbeb' },
   { to: '/cuentas',     label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: '#eff6ff' },
   { to: '/movimientos', label: 'Movimientos',  icon: ArrowUpDown,     end: false, color: '#f472b6', bg: '#fdf2f8' },
+  { to: '/calendario',  label: 'Calendario',   icon: CalendarDays,    end: false, color: '#34d399', bg: '#f0fdf4' },
 ]
 
 export default function MobileMenu() {
