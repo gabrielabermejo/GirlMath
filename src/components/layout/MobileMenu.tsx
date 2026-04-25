@@ -36,14 +36,14 @@ export default function MobileMenu() {
           WebkitBackdropFilter: 'blur(16px)',
         }}
       >
-        <div className="flex items-center gap-2">
+        <NavLink to="/" className="flex items-center gap-2 active:scale-95" style={{ transition: 'transform 0.1s ease' }}>
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-violet-300 shadow-sm shadow-pink-200">
             <Sparkles size={14} className="text-white" />
           </div>
           <span className="text-base font-bold bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent">
             GirlMath 🎀
           </span>
-        </div>
+        </NavLink>
 
         <button
           onClick={() => setOpen(true)}
