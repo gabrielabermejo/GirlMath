@@ -24,11 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   async function fetchProfile(userId: string) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, full_name, email, status, role, created_at')
       .eq('id', userId)
       .single()
+    console.log('[profile]', data, error)
     setProfile(data)
   }
 
