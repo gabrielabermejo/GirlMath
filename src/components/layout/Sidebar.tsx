@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, LayoutDashboard, TrendingUp, TrendingDown, Sparkles, RepeatIcon, LogOut, HandCoins, Landmark, ArrowUpDown } from 'lucide-react'
+import { Home, LayoutDashboard, TrendingUp, TrendingDown, Sparkles, RepeatIcon, LogOut, HandCoins, Landmark, ArrowUpDown, ShieldCheck } from 'lucide-react'
 import clsx from 'clsx'
 import { useSidebar } from '../../context/SidebarContext'
 import { useAuth } from '../../context/AuthContext'
@@ -10,14 +10,14 @@ const links = [
   { to: '/ingresos',     label: 'Ingresos',     icon: TrendingUp },
   { to: '/gastos',       label: 'Gastos',       icon: TrendingDown },
   { to: '/gastos-fijos', label: 'Gastos fijos', icon: RepeatIcon },
-  { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins },
-  { to: '/cuentas',      label: 'Cuentas',       icon: Landmark },
-  { to: '/movimientos',  label: 'Movimientos',   icon: ArrowUpDown },
+  { to: '/prestamos',    label: 'Préstamos',    icon: HandCoins },
+  { to: '/cuentas',      label: 'Cuentas',      icon: Landmark },
+  { to: '/movimientos',  label: 'Movimientos',  icon: ArrowUpDown },
 ]
 
 export default function Sidebar() {
   const { close } = useSidebar()
-  const { signOut } = useAuth()
+  const { signOut, profile } = useAuth()
 
   return (
     <aside className="flex h-full w-60 flex-col border-r border-pink-100 bg-white">
@@ -54,6 +54,28 @@ export default function Sidebar() {
             )}
           </NavLink>
         ))}
+
+        {profile?.role === 'admin' && (
+          <NavLink
+            to="/admin"
+            onClick={close}
+            className={({ isActive }) =>
+              clsx(
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition mt-1',
+                isActive
+                  ? 'bg-violet-50 text-violet-500 shadow-sm'
+                  : 'text-violet-300 hover:bg-violet-50 hover:text-violet-400',
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <ShieldCheck size={17} className={isActive ? 'text-violet-400' : ''} />
+                Admin
+              </>
+            )}
+          </NavLink>
+        )}
       </nav>
 
       <div className="border-t border-pink-100 p-4 flex flex-col gap-3">

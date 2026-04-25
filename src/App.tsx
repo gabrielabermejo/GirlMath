@@ -17,6 +17,8 @@ import FixedExpensesPage from './modules/fixed-expenses/FixedExpensesPage'
 import LoansPage from './modules/loans/LoansPage'
 import BankAccountsPage from './modules/bank-accounts/BankAccountsPage'
 import MovimientosPage from './modules/movimientos/MovimientosPage'
+import AdminPage from './modules/admin/AdminPage'
+import PendingPage from './pages/PendingPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,6 +63,7 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/pending" element={<PendingPage />} />
               <Route
                 element={
                   <ProtectedRoute>
@@ -77,6 +80,7 @@ export default function App() {
                 <Route path="prestamos" element={<LoansPage />} />
                 <Route path="cuentas" element={<BankAccountsPage />} />
                 <Route path="movimientos" element={<MovimientosPage />} />
+                <Route path="admin" element={<AdminPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

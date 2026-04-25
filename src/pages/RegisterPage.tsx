@@ -59,11 +59,14 @@ export default function RegisterPage() {
       await supabase.from('profiles').upsert({
         id: userId,
         full_name: values.full_name,
+        email: values.email,
+        status: 'pending',
+        role: 'user',
       }, { onConflict: 'id' })
     }
 
-    toast.success('¡Bienvenida! 🎀')
-    navigate('/')
+    toast.success('¡Cuenta creada! Espera la activación 🎀')
+    navigate('/pending')
   }
 
   return (

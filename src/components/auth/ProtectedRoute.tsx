@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth()
+  const { user, profile, isLoading } = useAuth()
 
   if (isLoading) {
     return (
@@ -16,6 +16,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!user) return <Navigate to="/login" replace />
+  if (profile && profile.status === 'pending') return <Navigate to="/pending" replace />
 
   return <>{children}</>
 }

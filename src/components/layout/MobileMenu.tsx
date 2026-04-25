@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
-  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown
+  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown, ShieldCheck
 } from 'lucide-react'
 import clsx from 'clsx'
+import { useAuth } from '../../context/AuthContext'
 
 const links = [
   { to: '/',             label: 'Inicio',       icon: Home,            end: true,  color: '#f9a8d4', bg: '#fdf2f8' },
@@ -13,12 +14,13 @@ const links = [
   { to: '/gastos',      label: 'Gastos',       icon: TrendingDown,    end: false, color: '#fb7185', bg: '#fff1f2' },
   { to: '/gastos-fijos',label: 'Gastos fijos', icon: RepeatIcon,      end: false, color: '#a78bfa', bg: '#f5f3ff' },
   { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: '#fffbeb' },
-  { to: '/cuentas',      label: 'Cuentas',      icon: Landmark,       end: false, color: '#60a5fa', bg: '#eff6ff' },
-  { to: '/movimientos',  label: 'Movimientos',  icon: ArrowUpDown,    end: false, color: '#f472b6', bg: '#fdf2f8' },
+  { to: '/cuentas',     label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: '#eff6ff' },
+  { to: '/movimientos', label: 'Movimientos',  icon: ArrowUpDown,     end: false, color: '#f472b6', bg: '#fdf2f8' },
 ]
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
+  const { profile } = useAuth()
 
   return (
     <>
@@ -96,7 +98,7 @@ export default function MobileMenu() {
 
         {/* Grid */}
         <nav className="px-4 grid grid-cols-2 gap-3">
-          {links.map(({ to, label, icon: Icon, end, color, bg }) => (
+          {[...links, ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: '#f5f3ff' }] : [])].map(({ to, label, icon: Icon, end, color, bg }) => (
             <NavLink
               key={to}
               to={to}

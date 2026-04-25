@@ -1,6 +1,9 @@
 export interface Profile {
   id: string
   full_name: string
+  email: string | null
+  status: 'pending' | 'active'
+  role: 'user' | 'admin'
   created_at: string
 }
 
