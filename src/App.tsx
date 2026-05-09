@@ -19,6 +19,7 @@ import BankAccountsPage from './modules/bank-accounts/BankAccountsPage'
 import MovimientosPage from './modules/movimientos/MovimientosPage'
 import CalendarioPage from './modules/calendario/CalendarioPage'
 import AdminPage from './modules/admin/AdminPage'
+import SavingsPage from './modules/savings/SavingsPage'
 import PendingPage from './pages/PendingPage'
 
 const queryClient = new QueryClient({
@@ -107,6 +108,7 @@ export default function App() {
                 <Route path="prestamos" element={<LoansPage />} />
                 <Route path="cuentas" element={<BankAccountsPage />} />
                 <Route path="movimientos" element={<MovimientosPage />} />
+                <Route path="ahorro" element={<SavingsPage />} />
                 <Route path="admin" element={<AdminPage />} />
                 <Route path="calendario" element={<CalendarioPage />} />
               </Route>

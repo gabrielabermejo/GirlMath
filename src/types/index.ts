@@ -116,9 +116,19 @@ export interface Loan {
   created_at: string
 }
 
+export interface Saving {
+  id: string
+  user_id: string
+  amount: number
+  date: string
+  description: string | null
+  created_at: string
+}
+
 export interface SavingsStats {
   goalPct: number
   goalAmount: number
+  actualSaved: number
   totalSpent: number
   remaining: number
   onTrack: boolean

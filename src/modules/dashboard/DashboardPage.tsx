@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useCountUp } from '../../hooks/useCountUp'
-import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert, Sparkles, RefreshCw, Plus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import Header from '../../components/layout/Header'
 import ExpensePieChart from './components/ExpensePieChart'
@@ -13,6 +14,7 @@ import { MONTHS, formatCurrency } from '../../lib/utils'
 import clsx from 'clsx'
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const qc = useQueryClient()
   const {
@@ -41,7 +43,6 @@ export default function DashboardPage() {
   const animGoalAmount   = useCountUp(savings.goalAmount,       750)
   const animTotalSpent   = useCountUp(savings.totalSpent,       800)
   const animRemaining    = useCountUp(savings.remaining,        850)
-  const animSavedPct     = useCountUp(savings.savedPct,         780)
   const animSavedAmount  = useCountUp(savings.savedAmount,      780)
 
   const [editingGoal, setEditingGoal] = useState(false)
@@ -409,9 +410,9 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-5 relative z-10">
             {[
               { label: 'Meta ahorro',   value: formatCurrency(animGoalAmount),  sub: savingsMode === 'percent' ? `${savingsGoal}% del ingreso` : 'Monto fijo', color: '#ec4899' },
-              { label: 'Total gastado', value: formatCurrency(animTotalSpent),   sub: 'Variables + fijos',           color: '#a855f7' },
-              { label: 'Disponible',    value: formatCurrency(animRemaining),    sub: savings.remaining >= 0 ? 'Puedes gastar más' : 'Te excediste', color: savings.remaining >= 0 ? '#10b981' : '#f97316' },
-              { label: 'Ahorro real',   value: `${animSavedPct.toFixed(0)}%`,    sub: formatCurrency(animSavedAmount), color: savings.savedPct >= savings.goalPct ? '#10b981' : '#8b5cf6' },
+              { label: 'Ya ahorrado',   value: formatCurrency(animSavedAmount), sub: savings.actualSaved >= savings.goalAmount ? '¡Meta cumplida! 🎉' : `Faltan ${formatCurrency(savings.goalAmount - savings.actualSaved)}`, color: savings.actualSaved >= savings.goalAmount ? '#10b981' : '#8b5cf6' },
+              { label: 'Total gastado', value: formatCurrency(animTotalSpent),  sub: 'Variables + fijos',           color: '#a855f7' },
+              { label: 'Disponible',    value: formatCurrency(animRemaining),   sub: savings.remaining >= 0 ? 'Puedes gastar' : 'Te excediste', color: savings.remaining >= 0 ? '#10b981' : '#f97316' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -425,43 +426,83 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Progress bar */}
-          <div className="relative z-10">
+          {/* Savings progress bar (actual saved vs goal) */}
+          <div className="relative z-10 mb-3">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold text-pink-500">Presupuesto usado</span>
-              <span className="text-xs font-bold" style={{ color: savings.onTrack ? '#ec4899' : '#f97316' }}>
-                {totalIncome > 0
-                  ? Math.min(100, (savings.totalSpent / (totalIncome - savings.goalAmount)) * 100).toFixed(0)
+              <span className="text-xs font-semibold text-pink-500">Progreso de ahorro</span>
+              <span className="text-xs font-bold" style={{ color: savings.actualSaved >= savings.goalAmount ? '#10b981' : '#a855f7' }}>
+                {savings.goalAmount > 0
+                  ? Math.min(100, (savings.actualSaved / savings.goalAmount) * 100).toFixed(0)
                   : 0}%
               </span>
             </div>
-
-            {/* Track */}
-            <div className="relative h-4 w-full overflow-hidden rounded-full" style={{ background: 'rgba(249,168,212,0.2)' }}>
-              {/* Fill with shimmer */}
+            <div className="relative h-4 w-full overflow-hidden rounded-full" style={{ background: 'rgba(167,139,250,0.15)' }}>
               <div
-                className={savings.onTrack ? 'bar-shimmer-fill' : 'bar-shimmer-fill-warn'}
                 style={{
                   height: '100%',
                   borderRadius: '9999px',
-                  width: `${totalIncome > 0
-                    ? Math.min(100, (savings.totalSpent / (totalIncome - savings.goalAmount)) * 100)
-                    : 0}%`,
+                  width: `${savings.goalAmount > 0 ? Math.min(100, (savings.actualSaved / savings.goalAmount) * 100) : 0}%`,
+                  background: savings.actualSaved >= savings.goalAmount
+                    ? 'linear-gradient(90deg,#34d399,#10b981)'
+                    : 'linear-gradient(90deg,#c084fc,#818cf8)',
                   transition: 'width 0.8s ease',
                 }}
               />
-              {/* Gloss overlay */}
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 60%)' }}
-              />
+              <div className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.35) 0%,transparent 60%)' }} />
             </div>
+            <p className="mt-1.5 text-xs text-center font-semibold" style={{ color: savings.actualSaved >= savings.goalAmount ? '#10b981' : '#8b5cf6' }}>
+              {savings.actualSaved >= savings.goalAmount
+                ? '🎉 ¡Alcanzaste tu meta de ahorro este mes!'
+                : `Ahorrado ${formatCurrency(savings.actualSaved)} de ${formatCurrency(savings.goalAmount)}`}
+            </p>
+          </div>
 
-            <p className="mt-2 text-center text-xs font-semibold" style={{ color: savings.onTrack ? '#ec4899' : '#f97316' }}>
-              {savings.onTrack
-                ? `✨ Vas bien — te quedan ${formatCurrency(savings.remaining)} para gastar`
+          {/* Budget bar (spent vs spendable budget) */}
+          <div className="relative z-10">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-semibold text-pink-500">Presupuesto usado</span>
+              <span className="text-xs font-bold" style={{ color: savings.remaining >= 0 ? '#ec4899' : '#f97316' }}>
+                {totalIncome > 0
+                  ? Math.min(100, (savings.totalSpent / Math.max(1, totalIncome - savings.actualSaved)) * 100).toFixed(0)
+                  : 0}%
+              </span>
+            </div>
+            <div className="relative h-4 w-full overflow-hidden rounded-full" style={{ background: 'rgba(249,168,212,0.2)' }}>
+              <div
+                className={savings.remaining >= 0 ? 'bar-shimmer-fill' : 'bar-shimmer-fill-warn'}
+                style={{
+                  height: '100%',
+                  borderRadius: '9999px',
+                  width: `${totalIncome > 0 ? Math.min(100, (savings.totalSpent / Math.max(1, totalIncome - savings.actualSaved)) * 100) : 0}%`,
+                  transition: 'width 0.8s ease',
+                }}
+              />
+              <div className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ background: 'linear-gradient(180deg,rgba(255,255,255,0.35) 0%,transparent 60%)' }} />
+            </div>
+            <p className="mt-1.5 text-center text-xs font-semibold" style={{ color: savings.remaining >= 0 ? '#ec4899' : '#f97316' }}>
+              {savings.remaining >= 0
+                ? `✨ Te quedan ${formatCurrency(savings.remaining)} para gastar`
                 : `⚠️ Te excediste en ${formatCurrency(Math.abs(savings.remaining))}`}
             </p>
+          </div>
+
+          {/* Quick save button */}
+          <div className="relative z-10 mt-4 flex justify-center">
+            <button
+              onClick={() => navigate('/ahorro')}
+              className="flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg,#f9a8d4,#c084fc)',
+                color: 'white',
+                boxShadow: '0 4px 16px rgba(192,132,252,0.4)',
+                border: 'none',
+              }}
+            >
+              <Plus size={15} />
+              Apartar ahorro
+            </button>
           </div>
         </div>
 

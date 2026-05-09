@@ -3,6 +3,7 @@ import { useFilters } from '../../../context/FiltersContext'
 import { useIncomes } from '../../income/hooks/useIncomes'
 import { useExpenses } from '../../expenses/hooks/useExpenses'
 import { useFixedExpenses } from '../../fixed-expenses/hooks/useFixedExpenses'
+import { useSavings } from '../../savings/hooks/useSavings'
 import {
   CategoryTotal, MonthlyBalance,
   SavingsStats, CATEGORY_LABELS, CATEGORY_COLORS, ExpenseCategory,
@@ -15,8 +16,9 @@ export function useDashboardStats() {
   const { data: allIncomes = [], isLoading: loadingIncomes } = useIncomes()
   const { data: allExpenses = [], isLoading: loadingExpenses } = useExpenses()
   const { data: fixedExpenses = [], isLoading: loadingFixed } = useFixedExpenses()
+  const { data: allSavings = [], isLoading: loadingSavings } = useSavings()
 
-  const isLoading = loadingIncomes || loadingExpenses || loadingFixed
+  const isLoading = loadingIncomes || loadingExpenses || loadingFixed || loadingSavings
 
   const monthIncomes = useMemo(() =>
     allIncomes.filter((i) => {
@@ -89,25 +91,37 @@ export function useDashboardStats() {
     return cumIncome - cumVarExpenses - cumFixedExpenses
   }, [allIncomes, allExpenses, fixedExpenses, filters.month, filters.year])
 
+  // Ahorros reales del mes seleccionado (registrados en el módulo de ahorros)
+  const actualSavedThisMonth = useMemo(() =>
+    allSavings
+      .filter((s) => {
+        const d = new Date(s.date + 'T00:00:00')
+        return d.getMonth() === filters.month && d.getFullYear() === filters.year
+      })
+      .reduce((sum, s) => sum + s.amount, 0),
+    [allSavings, filters.month, filters.year],
+  )
+
   const savings = useMemo((): SavingsStats => {
     const goalAmount = savingsMode === 'percent'
       ? totalIncome * (savingsGoal / 100)
       : savingsFixedAmount
     const goalPct = totalIncome > 0 ? (goalAmount / totalIncome) * 100 : 0
     const totalSpent = totalExpenses
-    const remaining = totalIncome - goalAmount - totalSpent
-    const savedAmount = Math.max(0, totalIncome - totalSpent)
-    const savedPct = totalIncome > 0 ? (savedAmount / totalIncome) * 100 : 0
+    // disponible = ingreso - lo ya ahorrado - lo gastado
+    const remaining = totalIncome - actualSavedThisMonth - totalSpent
+    const savedPct = totalIncome > 0 ? (actualSavedThisMonth / totalIncome) * 100 : 0
     return {
       goalPct,
       goalAmount,
+      actualSaved: actualSavedThisMonth,
       totalSpent,
       remaining,
-      onTrack: remaining >= 0,
-      savedAmount,
+      onTrack: actualSavedThisMonth >= goalAmount,
+      savedAmount: actualSavedThisMonth,
       savedPct,
     }
-  }, [totalIncome, totalExpenses, savingsGoal, savingsMode, savingsFixedAmount])
+  }, [totalIncome, totalExpenses, actualSavedThisMonth, savingsGoal, savingsMode, savingsFixedAmount])
 
   const expensesByCategory = useMemo((): CategoryTotal[] => {
     const map: Partial<Record<ExpenseCategory, number>> = {}
