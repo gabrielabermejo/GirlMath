@@ -1,4 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <filter id="star-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
   <rect width="192" height="192" rx="40" fill="#fdf2f8"/>
+
+  <!-- Bow emoji -->
   <text x="96" y="130" font-size="100" text-anchor="middle">🎀</text>
+
+  <!-- Small gold star — bottom-right of bow -->
+  <polygon
+    points="148,146 150.9,154 159.4,154.3 152.8,159.6 155.1,167.7 148,163 141,167.7 143.2,159.6 136.6,154.3 145.1,154"
+    fill="#fbbf24"
+    stroke="white"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+    filter="url(#star-glow)"
+  />
+
+  <!-- Shine highlight on the star -->
+  <ellipse cx="145" cy="150.5" rx="3" ry="2" fill="rgba(255,255,255,0.65)" transform="rotate(-20,145,150.5)"/>
 </svg>
