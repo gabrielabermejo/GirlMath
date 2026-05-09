@@ -1,21 +1,22 @@
 import { useMemo } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '../../../context/AuthContext'
 import { useFilters } from '../../../context/FiltersContext'
+import { useIncomes } from '../../income/hooks/useIncomes'
+import { useExpenses } from '../../expenses/hooks/useExpenses'
+import { useFixedExpenses } from '../../fixed-expenses/hooks/useFixedExpenses'
 import {
-  Income, Expense, FixedExpense, CategoryTotal, MonthlyBalance,
+  CategoryTotal, MonthlyBalance,
   SavingsStats, CATEGORY_LABELS, CATEGORY_COLORS, ExpenseCategory,
 } from '../../../types'
 import { MONTHS } from '../../../lib/utils'
 
 export function useDashboardStats() {
-  const { user } = useAuth()
   const { filters, savingsGoal } = useFilters()
-  const qc = useQueryClient()
 
-  const allIncomes = qc.getQueryData<Income[]>(['incomes', user?.id]) ?? []
-  const allExpenses = qc.getQueryData<Expense[]>(['expenses', user?.id]) ?? []
-  const fixedExpenses = qc.getQueryData<FixedExpense[]>(['fixed_expenses', user?.id]) ?? []
+  const { data: allIncomes = [], isLoading: loadingIncomes } = useIncomes()
+  const { data: allExpenses = [], isLoading: loadingExpenses } = useExpenses()
+  const { data: fixedExpenses = [], isLoading: loadingFixed } = useFixedExpenses()
+
+  const isLoading = loadingIncomes || loadingExpenses || loadingFixed
 
   const monthIncomes = useMemo(() =>
     allIncomes.filter((i) => {
@@ -155,6 +156,7 @@ export function useDashboardStats() {
   }, [allIncomes, allExpenses, fixedExpenses])
 
   return {
+    isLoading,
     totalIncome,
     totalVariableExpenses,
     totalFixedExpenses,

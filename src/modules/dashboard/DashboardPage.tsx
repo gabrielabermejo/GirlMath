@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert, Sparkles } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import Header from '../../components/layout/Header'
 import ExpensePieChart from './components/ExpensePieChart'
@@ -8,8 +8,6 @@ import BudgetAlertModal from './components/BudgetAlertModal'
 import { useDashboardStats } from './hooks/useDashboardStats'
 import { useFilters } from '../../context/FiltersContext'
 import { useAuth } from '../../context/AuthContext'
-import { supabase } from '../../lib/supabase'
-import { Income, Expense, FixedExpense } from '../../types'
 import { MONTHS, formatCurrency } from '../../lib/utils'
 import clsx from 'clsx'
 
@@ -18,6 +16,7 @@ export default function DashboardPage() {
   const qc = useQueryClient()
   const { filters, setMonth, setYear, savingsGoal, setSavingsGoal } = useFilters()
   const {
+    isLoading: statsLoading,
     totalIncome,
     totalVariableExpenses,
     totalFixedExpenses,
@@ -31,6 +30,18 @@ export default function DashboardPage() {
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalDraft, setGoalDraft] = useState(String(savingsGoal))
   const [loginAlertOpen, setLoginAlertOpen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  async function handleRefresh() {
+    if (!user) return
+    setIsRefreshing(true)
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ['incomes', user.id] }),
+      qc.invalidateQueries({ queryKey: ['expenses', user.id] }),
+      qc.invalidateQueries({ queryKey: ['fixed_expenses', user.id] }),
+    ])
+    setIsRefreshing(false)
+  }
 
   function confirmGoalEdit() {
     const n = Number(goalDraft)
@@ -38,54 +49,6 @@ export default function DashboardPage() {
     setEditingGoal(false)
   }
 
-  useEffect(() => {
-    if (!user) return
-    if (!qc.getQueryData(['incomes', user.id])) {
-      qc.fetchQuery({
-        queryKey: ['incomes', user.id],
-        queryFn: async () => {
-          const { data, error } = await supabase
-            .from('incomes')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('date', { ascending: false })
-          if (error) throw error
-          return data as Income[]
-        },
-        staleTime: 1000 * 60 * 5,
-      })
-    }
-    if (!qc.getQueryData(['expenses', user.id])) {
-      qc.fetchQuery({
-        queryKey: ['expenses', user.id],
-        queryFn: async () => {
-          const { data, error } = await supabase
-            .from('expenses')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('date', { ascending: false })
-          if (error) throw error
-          return data as Expense[]
-        },
-        staleTime: 1000 * 60 * 5,
-      })
-    }
-    if (!qc.getQueryData(['fixed_expenses', user.id])) {
-      qc.fetchQuery({
-        queryKey: ['fixed_expenses', user.id],
-        queryFn: async () => {
-          const { data, error } = await supabase
-            .from('fixed_expenses')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('description', { ascending: true })
-          if (error) throw error
-          return data as FixedExpense[]
-        },
-        staleTime: 1000 * 60 * 5,
-      })
-    }
-  }, [user, qc])
 
   const availableBudget = totalIncome - savings.goalAmount
   const spentPct = availableBudget > 0 ? (savings.totalSpent / availableBudget) * 100 : 0
@@ -148,7 +111,7 @@ export default function DashboardPage() {
 
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         {/* Month/Year filter */}
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <select
             className="input w-auto"
             value={filters.month}
@@ -167,6 +130,15 @@ export default function DashboardPage() {
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing || statsLoading}
+            title="Refrescar datos"
+            className="flex items-center gap-1.5 rounded-xl border border-pink-200 bg-white px-3 py-2 text-xs font-medium text-pink-500 shadow-sm transition hover:bg-pink-50 disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={isRefreshing || statsLoading ? 'animate-spin' : ''} />
+            {isRefreshing ? 'Actualizando...' : 'Refrescar'}
+          </button>
         </div>
 
         {/* Budget alert */}
