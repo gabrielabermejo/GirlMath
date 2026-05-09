@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Plus, Pencil, Trash2, TrendingUp, ArrowUpDown } from 'lucide-react'
+import SwipeableRow from '../../components/ui/SwipeableRow'
 import Header from '../../components/layout/Header'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
@@ -99,8 +100,53 @@ export default function IncomePage() {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="card overflow-hidden">
+        {/* Mobile swipeable list */}
+        <div className="md:hidden card overflow-hidden">
+          {isLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">
+              <ArrowUpDown size={32} />
+              <p className="text-sm">No hay ingresos en este período</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-green-50">
+              {filtered.map((income) => (
+                <SwipeableRow
+                  key={income.id}
+                  onEdit={() => openEdit(income)}
+                  onDelete={() => setDeleting(income)}
+                  editColor="#10b981"
+                  deleteColor="#a78bfa"
+                >
+                  <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{income.description}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-400">
+                          {format(new Date(income.date + 'T00:00:00'), 'dd MMM', { locale: es })}
+                        </span>
+                        {income.category ? (
+                          <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                            {income.category}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-emerald-600 shrink-0">
+                      {formatCurrency(income.amount)}
+                    </span>
+                  </div>
+                </SwipeableRow>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block card overflow-hidden">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
@@ -112,57 +158,47 @@ export default function IncomePage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[520px]">
-              <thead className="border-b border-pink-50 bg-pink-50/40">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Fecha</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Descripción</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Categoría</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-500">Monto</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-500">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-pink-50">
-                {filtered.map((income) => (
-                  <tr key={income.id} className="hover:bg-pink-50/30">
-                    <td className="px-4 py-3 text-gray-600">
-                      {format(new Date(income.date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {income.description}
-                    </td>
-                    <td className="px-4 py-3">
-                      {income.category ? (
-                        <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                          {income.category}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-600">
-                      {formatCurrency(income.amount)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() => openEdit(income)}
-                          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => setDeleting(income)}
-                          className="rounded-lg p-1.5 text-gray-400 hover:bg-violet-50 hover:text-violet-400"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
+              <table className="w-full text-sm min-w-[520px]">
+                <thead className="border-b border-pink-50 bg-pink-50/40">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Fecha</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Descripción</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Categoría</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Monto</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-pink-50">
+                  {filtered.map((income) => (
+                    <tr key={income.id} className="hover:bg-pink-50/30">
+                      <td className="px-4 py-3 text-gray-600">
+                        {format(new Date(income.date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{income.description}</td>
+                      <td className="px-4 py-3">
+                        {income.category ? (
+                          <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                            {income.category}
+                          </span>
+                        ) : <span className="text-gray-400">—</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-emerald-600">
+                        {formatCurrency(income.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button onClick={() => openEdit(income)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => setDeleting(income)} className="rounded-lg p-1.5 text-gray-400 hover:bg-violet-50 hover:text-violet-400">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
