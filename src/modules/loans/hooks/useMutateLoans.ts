@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../context/AuthContext'
-import toast from 'react-hot-toast'
+import { toast } from '../../../lib/toast'
 
 interface LoanPayload {
   person_name: string

@@ -60,7 +60,33 @@ export default function App() {
       <AuthProvider>
         <FiltersProvider>
           <BrowserRouter>
-            <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+            <Toaster
+              position="top-center"
+              gutter={8}
+              containerStyle={{ top: 20 }}
+              toastOptions={{
+                duration: 2500,
+                style: {
+                  background: 'rgba(255,255,255,0.88)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255,255,255,0.75)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9)',
+                  borderRadius: 18,
+                  padding: '10px 16px',
+                  color: '#374151',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  maxWidth: 320,
+                },
+                success: {
+                  iconTheme: { primary: '#10b981', secondary: 'white' },
+                },
+                error: {
+                  iconTheme: { primary: '#ef4444', secondary: 'white' },
+                },
+              }}
+            />
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
