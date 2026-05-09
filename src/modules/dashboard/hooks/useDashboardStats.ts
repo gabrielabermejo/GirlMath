@@ -10,7 +10,7 @@ import {
 import { MONTHS } from '../../../lib/utils'
 
 export function useDashboardStats() {
-  const { filters, savingsGoal } = useFilters()
+  const { filters, savingsGoal, savingsMode, savingsFixedAmount } = useFilters()
 
   const { data: allIncomes = [], isLoading: loadingIncomes } = useIncomes()
   const { data: allExpenses = [], isLoading: loadingExpenses } = useExpenses()
@@ -90,13 +90,16 @@ export function useDashboardStats() {
   }, [allIncomes, allExpenses, fixedExpenses, filters.month, filters.year])
 
   const savings = useMemo((): SavingsStats => {
-    const goalAmount = totalIncome * (savingsGoal / 100)
+    const goalAmount = savingsMode === 'percent'
+      ? totalIncome * (savingsGoal / 100)
+      : savingsFixedAmount
+    const goalPct = totalIncome > 0 ? (goalAmount / totalIncome) * 100 : 0
     const totalSpent = totalExpenses
     const remaining = totalIncome - goalAmount - totalSpent
     const savedAmount = Math.max(0, totalIncome - totalSpent)
     const savedPct = totalIncome > 0 ? (savedAmount / totalIncome) * 100 : 0
     return {
-      goalPct: savingsGoal,
+      goalPct,
       goalAmount,
       totalSpent,
       remaining,
@@ -104,7 +107,7 @@ export function useDashboardStats() {
       savedAmount,
       savedPct,
     }
-  }, [totalIncome, totalExpenses, savingsGoal])
+  }, [totalIncome, totalExpenses, savingsGoal, savingsMode, savingsFixedAmount])
 
   const expensesByCategory = useMemo((): CategoryTotal[] => {
     const map: Partial<Record<ExpenseCategory, number>> = {}

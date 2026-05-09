@@ -15,7 +15,12 @@ import clsx from 'clsx'
 export default function DashboardPage() {
   const { user } = useAuth()
   const qc = useQueryClient()
-  const { filters, setMonth, setYear, savingsGoal, setSavingsGoal } = useFilters()
+  const {
+    filters, setMonth, setYear,
+    savingsGoal, setSavingsGoal,
+    savingsMode, setSavingsMode,
+    savingsFixedAmount, setSavingsFixedAmount,
+  } = useFilters()
   const {
     isLoading: statsLoading,
     totalIncome,
@@ -41,6 +46,7 @@ export default function DashboardPage() {
 
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalDraft, setGoalDraft] = useState(String(savingsGoal))
+  const [editMode, setEditMode] = useState<'percent' | 'fixed'>(savingsMode)
   const [loginAlertOpen, setLoginAlertOpen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -55,15 +61,36 @@ export default function DashboardPage() {
     setIsRefreshing(false)
   }
 
+  function openGoalEditor() {
+    setEditMode(savingsMode)
+    setGoalDraft(savingsMode === 'percent' ? String(savingsGoal) : String(savingsFixedAmount))
+    setEditingGoal(true)
+  }
+
+  function switchEditMode(mode: 'percent' | 'fixed') {
+    setEditMode(mode)
+    setGoalDraft(mode === 'percent' ? String(savingsGoal) : String(savingsFixedAmount))
+  }
+
   function confirmGoalEdit() {
     const n = Number(goalDraft)
-    if (!isNaN(n) && n >= 0 && n <= 100) setSavingsGoal(n)
+    if (isNaN(n) || n < 0) { setEditingGoal(false); return }
+    if (editMode === 'percent') {
+      setSavingsGoal(Math.min(100, n))
+      setSavingsMode('percent')
+    } else {
+      setSavingsFixedAmount(n)
+      setSavingsMode('fixed')
+    }
     setEditingGoal(false)
   }
 
 
   const availableBudget = totalIncome - savings.goalAmount
   const spentPct = availableBudget > 0 ? (savings.totalSpent / availableBudget) * 100 : 0
+  const goalLabel = savingsMode === 'percent'
+    ? `${savingsGoal}%`
+    : formatCurrency(savingsFixedAmount)
 
   type AlertLevel = 'exceeded' | 'critical' | 'warning' | null
   const alertLevel: AlertLevel =
@@ -92,7 +119,7 @@ export default function DashboardPage() {
       textColor: 'text-violet-600',
       barColor: 'bg-violet-300',
       title: '¡Superaste tu presupuesto disponible!',
-      message: `Llevas gastado ${formatCurrency(savings.totalSpent)} de un presupuesto de ${formatCurrency(availableBudget)} (${spentPct.toFixed(0)}%). Tu meta de ahorro del ${savingsGoal}% está en riesgo. Evita nuevos gastos este mes.`,
+      message: `Llevas gastado ${formatCurrency(savings.totalSpent)} de un presupuesto de ${formatCurrency(availableBudget)} (${spentPct.toFixed(0)}%). Tu meta de ahorro de ${goalLabel} está en riesgo. Evita nuevos gastos este mes.`,
     },
     critical: {
       icon: AlertCircle,
@@ -102,7 +129,7 @@ export default function DashboardPage() {
       textColor: 'text-blue-500',
       barColor: 'bg-blue-300',
       title: 'Estás casi en tu límite de gasto',
-      message: `Has usado el ${spentPct.toFixed(0)}% de tu presupuesto disponible. Solo te quedan ${formatCurrency(savings.remaining)} para gastar y respetar tu meta de ahorro del ${savingsGoal}%.`,
+      message: `Has usado el ${spentPct.toFixed(0)}% de tu presupuesto disponible. Solo te quedan ${formatCurrency(savings.remaining)} para gastar y respetar tu meta de ahorro de ${goalLabel}.`,
     },
     warning: {
       icon: AlertTriangle,
@@ -112,7 +139,7 @@ export default function DashboardPage() {
       textColor: 'text-yellow-500',
       barColor: 'bg-yellow-300',
       title: 'El presupuesto disponible se está agotando',
-      message: `Llevas el ${spentPct.toFixed(0)}% del presupuesto gastado. Te quedan ${formatCurrency(savings.remaining)} disponibles. Modera tus gastos para alcanzar tu meta de ahorro del ${savingsGoal}%.`,
+      message: `Llevas el ${spentPct.toFixed(0)}% del presupuesto gastado. Te quedan ${formatCurrency(savings.remaining)} disponibles. Modera tus gastos para alcanzar tu meta de ahorro de ${goalLabel}.`,
     },
   } as const
 
@@ -304,15 +331,45 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Goal % editor */}
+            {/* Goal editor */}
             <div className="flex items-center gap-1.5">
               {editingGoal ? (
                 <>
+                  {/* Mode toggle pill */}
+                  <div style={{
+                    display: 'flex',
+                    background: 'rgba(249,168,212,0.2)',
+                    borderRadius: 10,
+                    padding: 2,
+                    border: '1px solid rgba(249,168,212,0.4)',
+                  }}>
+                    {(['percent', 'fixed'] as const).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => switchEditMode(mode)}
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          background: editMode === mode ? 'white' : 'transparent',
+                          color: editMode === mode ? '#db2777' : '#f9a8d4',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.18s ease',
+                          boxShadow: editMode === mode ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                        }}
+                      >
+                        {mode === 'percent' ? '%' : '$'}
+                      </button>
+                    ))}
+                  </div>
                   <input
                     type="number"
                     min="0"
-                    max="100"
-                    className="w-14 rounded-xl border border-pink-200 bg-white/80 px-2 py-0.5 text-center text-sm font-semibold text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    max={editMode === 'percent' ? 100 : undefined}
+                    className="w-20 rounded-xl border border-pink-200 bg-white/80 px-2 py-0.5 text-center text-sm font-semibold text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300"
                     value={goalDraft}
                     onChange={(e) => setGoalDraft(e.target.value)}
                     onKeyDown={(e) => {
@@ -321,7 +378,9 @@ export default function DashboardPage() {
                     }}
                     autoFocus
                   />
-                  <span className="text-sm text-pink-400 font-bold">%</span>
+                  <span className="text-sm text-pink-400 font-bold">
+                    {editMode === 'percent' ? '%' : ''}
+                  </span>
                   <button onClick={confirmGoalEdit} className="rounded-lg p-1 text-pink-500 hover:bg-pink-100">
                     <Check size={14} />
                   </button>
@@ -331,11 +390,15 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <button
-                  onClick={() => { setGoalDraft(String(savingsGoal)); setEditingGoal(true) }}
+                  onClick={openGoalEditor}
                   className="flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold transition"
                   style={{ background: 'rgba(249,168,212,0.2)', color: '#db2777', border: '1px solid #f9a8d460' }}
                 >
-                  <span>{savingsGoal}% ahorro</span>
+                  <span>
+                    {savingsMode === 'percent'
+                      ? `${savingsGoal}% ahorro`
+                      : `${formatCurrency(savingsFixedAmount)} ahorro`}
+                  </span>
                   <Pencil size={10} />
                 </button>
               )}
@@ -345,10 +408,10 @@ export default function DashboardPage() {
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-5 relative z-10">
             {[
-              { label: 'Meta ahorro',   value: formatCurrency(animGoalAmount),  sub: `${savingsGoal}% del ingreso`, color: '#ec4899' },
+              { label: 'Meta ahorro',   value: formatCurrency(animGoalAmount),  sub: savingsMode === 'percent' ? `${savingsGoal}% del ingreso` : 'Monto fijo', color: '#ec4899' },
               { label: 'Total gastado', value: formatCurrency(animTotalSpent),   sub: 'Variables + fijos',           color: '#a855f7' },
               { label: 'Disponible',    value: formatCurrency(animRemaining),    sub: savings.remaining >= 0 ? 'Puedes gastar más' : 'Te excediste', color: savings.remaining >= 0 ? '#10b981' : '#f97316' },
-              { label: 'Ahorro real',   value: `${animSavedPct.toFixed(0)}%`,    sub: formatCurrency(animSavedAmount), color: savings.savedPct >= savingsGoal ? '#10b981' : '#8b5cf6' },
+              { label: 'Ahorro real',   value: `${animSavedPct.toFixed(0)}%`,    sub: formatCurrency(animSavedAmount), color: savings.savedPct >= savings.goalPct ? '#10b981' : '#8b5cf6' },
             ].map((stat) => (
               <div
                 key={stat.label}

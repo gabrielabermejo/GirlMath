@@ -6,6 +6,8 @@ import {
 } from 'react'
 import { FiltersState, ExpenseCategory, SortBy, SortDir } from '../types'
 
+export type SavingsMode = 'percent' | 'fixed'
+
 interface FiltersContextValue {
   filters: FiltersState
   setMonth: (month: number) => void
@@ -16,6 +18,10 @@ interface FiltersContextValue {
   resetFilters: () => void
   savingsGoal: number
   setSavingsGoal: (pct: number) => void
+  savingsMode: SavingsMode
+  setSavingsMode: (mode: SavingsMode) => void
+  savingsFixedAmount: number
+  setSavingsFixedAmount: (amount: number) => void
 }
 
 const now = new Date()
@@ -32,14 +38,32 @@ const FiltersContext = createContext<FiltersContextValue | null>(null)
 
 export function FiltersProvider({ children }: { children: ReactNode }) {
   const [filters, setFilters] = useState<FiltersState>(defaultFilters)
+
   const [savingsGoal, setSavingsGoalState] = useState<number>(() =>
     Number(localStorage.getItem('savings_goal') ?? '55'),
+  )
+  const [savingsMode, setSavingsModeState] = useState<SavingsMode>(() =>
+    (localStorage.getItem('savings_mode') as SavingsMode | null) ?? 'percent',
+  )
+  const [savingsFixedAmount, setSavingsFixedAmountState] = useState<number>(() =>
+    Number(localStorage.getItem('savings_fixed_amount') ?? '0'),
   )
 
   function setSavingsGoal(pct: number) {
     const clamped = Math.min(100, Math.max(0, pct))
     localStorage.setItem('savings_goal', String(clamped))
     setSavingsGoalState(clamped)
+  }
+
+  function setSavingsMode(mode: SavingsMode) {
+    localStorage.setItem('savings_mode', mode)
+    setSavingsModeState(mode)
+  }
+
+  function setSavingsFixedAmount(amount: number) {
+    const clamped = Math.max(0, amount)
+    localStorage.setItem('savings_fixed_amount', String(clamped))
+    setSavingsFixedAmountState(clamped)
   }
 
   return (
@@ -55,6 +79,10 @@ export function FiltersProvider({ children }: { children: ReactNode }) {
         resetFilters: () => setFilters(defaultFilters),
         savingsGoal,
         setSavingsGoal,
+        savingsMode,
+        setSavingsMode,
+        savingsFixedAmount,
+        setSavingsFixedAmount,
       }}
     >
       {children}
