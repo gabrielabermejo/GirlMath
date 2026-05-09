@@ -10,62 +10,239 @@ export default function HomePage() {
   const { profile } = useAuth()
   const [incomeOpen, setIncomeOpen] = useState(false)
   const [expenseOpen, setExpenseOpen] = useState(false)
+  const [incomePressed, setIncomePressed] = useState(false)
+  const [expensePressed, setExpensePressed] = useState(false)
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'hola'
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-5 md:p-8 relative">
-      {/* Notification bell */}
-      <div className="absolute top-0 right-0 p-2">
-        <NotificationBell />
-      </div>
+    <>
+      <style>{`
+        @keyframes float-orb {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%       { transform: translateY(-18px) scale(1.04); }
+        }
+        @keyframes card-glow-in {
+          from { opacity: 0; transform: translateY(28px) scale(0.93); }
+          to   { opacity: 1; transform: translateY(0px) scale(1); }
+        }
+        .home-card-income { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both; }
+        .home-card-expense { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.22s both; }
+      `}</style>
 
-      {/* Greeting */}
-      <div className="mb-12 text-center">
-        <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-pink-300 to-violet-200 shadow-lg shadow-pink-100 mb-4">
-          <Sparkles size={28} className="text-white" />
+      <div
+        className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-5 md:p-8 relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(160deg, #fdf2f8 0%, #f5f3ff 45%, #fdf4ff 100%)',
+        }}
+      >
+        {/* Floating background orbs */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '8%',
+            left: '12%',
+            width: 200,
+            height: 200,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(249,168,212,0.28) 0%, transparent 70%)',
+            animation: 'float-orb 7s ease-in-out infinite',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '14%',
+            right: '10%',
+            width: 160,
+            height: 160,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)',
+            animation: 'float-orb 9s ease-in-out infinite 1.5s',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '55%',
+            left: '5%',
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%)',
+            animation: 'float-orb 6s ease-in-out infinite 0.8s',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Notification bell */}
+        <div className="absolute top-0 right-0 p-2" style={{ zIndex: 10 }}>
+          <NotificationBell />
         </div>
-        <h1 className="text-3xl font-bold text-gray-700 mb-2">
-          Hola, <span className="bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent capitalize">{firstName}</span> ✨
-        </h1>
-        <p className="text-gray-400 text-sm">¿Qué quieres registrar hoy?</p>
-      </div>
 
-      {/* Action cards */}
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm sm:max-w-md">
-        {/* Ingreso */}
-        <button
-          onClick={() => setIncomeOpen(true)}
-          className="group flex-1 flex flex-col items-center gap-4 rounded-2xl border-2 border-green-100 bg-white p-6 md:p-8 shadow-sm transition-all hover:border-green-200 hover:shadow-md hover:-translate-y-0.5"
+        {/* Greeting */}
+        <div className="mb-12 text-center" style={{ position: 'relative', zIndex: 5 }}>
+          <div
+            className="inline-flex items-center justify-center h-16 w-16 rounded-2xl mb-4"
+            style={{
+              background: 'linear-gradient(135deg, #f9a8d4, #c084fc)',
+              boxShadow: '0 8px 28px rgba(236,72,153,0.35), inset 0 1px 0 rgba(255,255,255,0.45)',
+            }}
+          >
+            <Sparkles size={28} className="text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-700 mb-2">
+            Hola,{' '}
+            <span className="bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent capitalize">
+              {firstName}
+            </span>{' '}
+            ✨
+          </h1>
+          <p className="text-gray-400 text-sm">¿Qué quieres registrar hoy?</p>
+        </div>
+
+        {/* Action cards */}
+        <div
+          className="flex flex-col sm:flex-row gap-5 w-full max-w-sm sm:max-w-md"
+          style={{ position: 'relative', zIndex: 5 }}
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 transition-colors group-hover:bg-green-200">
-            <TrendingUp size={28} className="text-green-500" />
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-bold text-gray-700">Agregar ingreso</p>
-            <p className="text-xs text-gray-400 mt-1">Salario, freelance, extra…</p>
-          </div>
-        </button>
+          {/* Income card */}
+          <button
+            className="home-card-income group flex-1 flex flex-col items-center gap-4"
+            onPointerDown={() => setIncomePressed(true)}
+            onPointerUp={() => setIncomePressed(false)}
+            onPointerLeave={() => setIncomePressed(false)}
+            onClick={() => setIncomeOpen(true)}
+            style={{
+              padding: '2rem 1.5rem',
+              borderRadius: 28,
+              background: 'rgba(240,253,244,0.82)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1.5px solid rgba(52,211,153,0.35)',
+              boxShadow: incomePressed
+                ? '0 2px 10px rgba(52,211,153,0.15)'
+                : '0 8px 32px rgba(52,211,153,0.22), 0 1px 0 rgba(255,255,255,0.85) inset',
+              transform: incomePressed ? 'scale(0.94)' : 'scale(1)',
+              transition: incomePressed
+                ? 'transform 0.1s ease, box-shadow 0.1s ease'
+                : 'transform 0.55s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease',
+              cursor: 'pointer',
+              outline: 'none',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Gloss highlight */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '45%',
+                borderRadius: '28px 28px 60% 60%',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: 20,
+                background: 'linear-gradient(135deg, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.35) 100%)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1.5px solid rgba(52,211,153,0.4)',
+                boxShadow: '0 4px 16px rgba(52,211,153,0.25), inset 0 1px 0 rgba(255,255,255,0.7)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+              }}
+            >
+              <TrendingUp size={28} style={{ color: '#10b981' }} />
+            </div>
+            <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
+              <p className="text-lg font-bold text-gray-700">Agregar ingreso</p>
+              <p className="text-xs text-gray-400 mt-1">Salario, freelance, extra…</p>
+            </div>
+          </button>
 
-        {/* Gasto */}
-        <button
-          onClick={() => setExpenseOpen(true)}
-          className="group flex-1 flex flex-col items-center gap-4 rounded-2xl border-2 border-pink-100 bg-white p-8 shadow-sm transition-all hover:border-pink-200 hover:shadow-md hover:-translate-y-0.5"
-        >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-pink-100 transition-colors group-hover:bg-pink-200">
-            <TrendingDown size={28} className="text-pink-400" />
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-bold text-gray-700">Agregar gasto</p>
-            <p className="text-xs text-gray-400 mt-1">Comida, transporte, ocio…</p>
-          </div>
-        </button>
+          {/* Expense card */}
+          <button
+            className="home-card-expense group flex-1 flex flex-col items-center gap-4"
+            onPointerDown={() => setExpensePressed(true)}
+            onPointerUp={() => setExpensePressed(false)}
+            onPointerLeave={() => setExpensePressed(false)}
+            onClick={() => setExpenseOpen(true)}
+            style={{
+              padding: '2rem 1.5rem',
+              borderRadius: 28,
+              background: 'rgba(255,241,242,0.82)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1.5px solid rgba(251,113,133,0.32)',
+              boxShadow: expensePressed
+                ? '0 2px 10px rgba(251,113,133,0.15)'
+                : '0 8px 32px rgba(236,72,153,0.2), 0 1px 0 rgba(255,255,255,0.85) inset',
+              transform: expensePressed ? 'scale(0.94)' : 'scale(1)',
+              transition: expensePressed
+                ? 'transform 0.1s ease, box-shadow 0.1s ease'
+                : 'transform 0.55s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease',
+              cursor: 'pointer',
+              outline: 'none',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Gloss highlight */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '45%',
+                borderRadius: '28px 28px 60% 60%',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: 20,
+                background: 'linear-gradient(135deg, rgba(251,113,133,0.22) 0%, rgba(236,72,153,0.32) 100%)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1.5px solid rgba(251,113,133,0.4)',
+                boxShadow: '0 4px 16px rgba(236,72,153,0.22), inset 0 1px 0 rgba(255,255,255,0.7)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <TrendingDown size={28} style={{ color: '#ec4899' }} />
+            </div>
+            <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
+              <p className="text-lg font-bold text-gray-700">Agregar gasto</p>
+              <p className="text-xs text-gray-400 mt-1">Comida, transporte, ocio…</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Hint */}
+        <p className="mt-10 text-xs text-pink-300" style={{ position: 'relative', zIndex: 5 }}>
+          Usa el menú para ver tu dashboard y reportes
+        </p>
       </div>
-
-      {/* Hint */}
-      <p className="mt-10 text-xs text-pink-300">
-        Usa el menú para ver tu dashboard y reportes
-      </p>
 
       {/* Modals */}
       <Modal isOpen={incomeOpen} onClose={() => setIncomeOpen(false)} title="Nuevo ingreso">
@@ -75,6 +252,6 @@ export default function HomePage() {
       <Modal isOpen={expenseOpen} onClose={() => setExpenseOpen(false)} title="Nuevo gasto">
         <ExpenseForm onClose={() => setExpenseOpen(false)} />
       </Modal>
-    </div>
+    </>
   )
 }
