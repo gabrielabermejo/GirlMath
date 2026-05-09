@@ -22,7 +22,7 @@ function Layout() {
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <main
           className="flex-1 overflow-y-auto md:pb-0"
-          style={{ paddingBottom: 'calc(80px + max(env(safe-area-inset-bottom, 0px), 12px))' }}
+          style={{ paddingBottom: 'calc(76px + max(env(safe-area-inset-bottom, 0px), 16px))' }}
         >
           <AnimatedOutlet />
         </main>

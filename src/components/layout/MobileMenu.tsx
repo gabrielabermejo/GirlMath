@@ -2,137 +2,224 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
-  RepeatIcon, HandCoins, Landmark, Menu, X, Sparkles, ArrowUpDown, ShieldCheck, CalendarDays
+  RepeatIcon, HandCoins, Landmark, Sparkles, X,
+  ArrowUpDown, ShieldCheck, CalendarDays,
 } from 'lucide-react'
-import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
 
 const links = [
-  { to: '/',             label: 'Inicio',       icon: Home,            end: true,  color: '#f9a8d4', bg: '#fdf2f8' },
-  { to: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard, end: true,  color: '#c084fc', bg: '#faf5ff' },
-  { to: '/ingresos',    label: 'Ingresos',     icon: TrendingUp,      end: false, color: '#34d399', bg: '#f0fdf4' },
-  { to: '/gastos',      label: 'Gastos',       icon: TrendingDown,    end: false, color: '#fb7185', bg: '#fff1f2' },
-  { to: '/gastos-fijos',label: 'Gastos fijos', icon: RepeatIcon,      end: false, color: '#a78bfa', bg: '#f5f3ff' },
-  { to: '/prestamos',   label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: '#fffbeb' },
-  { to: '/cuentas',     label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: '#eff6ff' },
-  { to: '/movimientos', label: 'Movimientos',  icon: ArrowUpDown,     end: false, color: '#f472b6', bg: '#fdf2f8' },
-  { to: '/calendario',  label: 'Calendario',   icon: CalendarDays,    end: false, color: '#34d399', bg: '#f0fdf4' },
+  { to: '/',              label: 'Inicio',       icon: Home,            end: true,  color: '#f472b6', bg: 'rgba(253,242,248,0.95)' },
+  { to: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard, end: true,  color: '#c084fc', bg: 'rgba(250,245,255,0.95)' },
+  { to: '/ingresos',     label: 'Ingresos',     icon: TrendingUp,      end: false, color: '#34d399', bg: 'rgba(240,253,244,0.95)' },
+  { to: '/gastos',       label: 'Gastos',       icon: TrendingDown,    end: false, color: '#fb7185', bg: 'rgba(255,241,242,0.95)' },
+  { to: '/gastos-fijos', label: 'Fijos',        icon: RepeatIcon,      end: false, color: '#a78bfa', bg: 'rgba(245,243,255,0.95)' },
+  { to: '/prestamos',    label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: 'rgba(255,251,235,0.95)' },
+  { to: '/cuentas',      label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: 'rgba(239,246,255,0.95)' },
+  { to: '/movimientos',  label: 'Movimientos',  icon: ArrowUpDown,     end: false, color: '#f472b6', bg: 'rgba(253,242,248,0.95)' },
+  { to: '/calendario',   label: 'Calendario',   icon: CalendarDays,    end: false, color: '#2dd4bf', bg: 'rgba(240,253,250,0.95)' },
 ]
+
+// Compute radial arc positions: 150° arc centered at top (90°), radius 130px
+const ARC_DEG = 150
+const RADIUS = 130
+const START_ANGLE = 90 + ARC_DEG / 2 // 165°
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
   const { profile } = useAuth()
 
+  const allLinks = [
+    ...links,
+    ...(profile?.role === 'admin'
+      ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: 'rgba(245,243,255,0.95)' }]
+      : []),
+  ]
+
+  const count = allLinks.length
+
   return (
     <>
-      {/* Bottom bar */}
-      <div
-        className="md:hidden fixed bottom-0 inset-x-0 z-30 flex items-center justify-between px-5 border-t border-pink-100/80"
-        style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 30px)',
-          paddingTop: '12px',
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-        }}
-      >
-        <NavLink to="/" className="flex items-center gap-2 active:scale-95" style={{ transition: 'transform 0.1s ease' }}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-violet-300 shadow-sm shadow-pink-200">
-            <Sparkles size={14} className="text-white" />
-          </div>
-          <span className="text-base font-bold bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent">
-            GirlMath 🎀
-          </span>
-        </NavLink>
-
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-semibold transition"
-          style={{ background: 'linear-gradient(135deg, #ec4899, #a855f7)', color: 'white', boxShadow: '0 4px 14px rgba(236,72,153,0.3)' }}
-        >
-          <Menu size={18} />
-          Menú
-        </button>
-      </div>
+      <style>{`
+        @keyframes fab-pulse {
+          0%, 100% { box-shadow: 0 8px 28px rgba(236,72,153,0.5), 0 0 0 0 rgba(236,72,153,0.25); }
+          50%       { box-shadow: 0 8px 28px rgba(236,72,153,0.5), 0 0 0 10px rgba(236,72,153,0.0); }
+        }
+        .fab-idle { animation: fab-pulse 2.8s ease-in-out infinite; }
+      `}</style>
 
       {/* Backdrop */}
       <div
-        className={clsx(
-          'md:hidden fixed inset-0 z-40 transition-opacity duration-300',
-          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        )}
-        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', transition: 'opacity 0.25s ease' }}
+        className="md:hidden fixed inset-0 z-40"
+        style={{
+          background: 'rgba(0,0,0,0.45)',
+          backdropFilter: open ? 'blur(10px)' : 'blur(0px)',
+          WebkitBackdropFilter: open ? 'blur(10px)' : 'blur(0px)',
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? 'auto' : 'none',
+          transition: 'opacity 0.3s ease, backdrop-filter 0.3s ease',
+        }}
         onClick={() => setOpen(false)}
       />
 
-      {/* Drawer */}
+      {/* Bottom bar glass strip */}
       <div
-        className={clsx(
-          'md:hidden fixed inset-x-0 bottom-0 z-50',
-          open ? 'translate-y-0' : 'translate-y-full'
-        )}
+        className="md:hidden fixed bottom-0 inset-x-0 z-50"
         style={{
-          borderRadius: '28px 28px 0 0',
-          background: 'linear-gradient(160deg, #fff5f9 0%, #fdf4ff 100%)',
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
-          boxShadow: '0 -8px 40px rgba(236,72,153,0.15)',
-          transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+          height: 'calc(76px + max(env(safe-area-inset-bottom, 0px), 0px))',
+          background: 'rgba(255,255,255,0.75)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 -4px 24px rgba(236,72,153,0.06)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* FAB + radial items */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 flex justify-center"
+        style={{
+          paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 8px), 16px)',
+          paddingTop: 8,
+          pointerEvents: 'none',
         }}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-4 pb-2">
-          <div className="h-1.5 w-12 rounded-full bg-pink-200" />
-        </div>
+        {/* Anchor: same size as button so top:50%/left:50% maps to button center */}
+        <div style={{ position: 'relative', width: 60, height: 60 }}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pb-4">
-          <div>
-            <p className="text-lg font-bold text-gray-800">Módulos</p>
-            <p className="text-xs text-pink-400">¿A dónde quieres ir?</p>
-          </div>
+          {/* ── Radial items ── */}
+          {allLinks.map((link, i) => {
+            const angleDeg = START_ANGLE - i * (ARC_DEG / (count - 1))
+            const angleRad = (angleDeg * Math.PI) / 180
+            const tx = Math.round(RADIUS * Math.cos(angleRad))
+            const ty = Math.round(-RADIUS * Math.sin(angleRad))
+
+            const openDelay  = i * 38
+            const closeDelay = (count - 1 - i) * 22
+
+            return (
+              <div
+                key={link.to}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: open
+                    ? `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1)`
+                    : 'translate(-50%, -50%) scale(0)',
+                  opacity: open ? 1 : 0,
+                  transition: open
+                    ? `transform 0.55s cubic-bezier(0.34,1.56,0.64,1) ${openDelay}ms, opacity 0.28s ease ${openDelay * 0.6}ms`
+                    : `transform 0.28s cubic-bezier(0.55,0,1,0.45) ${closeDelay}ms, opacity 0.18s ease`,
+                  pointerEvents: open ? 'auto' : 'none',
+                  zIndex: 51,
+                }}
+              >
+                <NavLink to={link.to} end={link.end} onClick={() => setOpen(false)}>
+                  {({ isActive }) => (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, userSelect: 'none' }}>
+                      {/* Glass circle */}
+                      <div
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: '50%',
+                          background: isActive ? link.bg : 'rgba(255,255,255,0.82)',
+                          backdropFilter: 'blur(20px)',
+                          WebkitBackdropFilter: 'blur(20px)',
+                          border: `1.5px solid ${isActive ? link.color + '90' : 'rgba(255,255,255,0.75)'}`,
+                          boxShadow: isActive
+                            ? `0 4px 20px ${link.color}45, inset 0 1px 0 rgba(255,255,255,0.9)`
+                            : '0 4px 18px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'box-shadow 0.15s ease',
+                        }}
+                      >
+                        <link.icon size={19} style={{ color: isActive ? link.color : '#6b7280' }} />
+                      </div>
+
+                      {/* Label */}
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          color: 'white',
+                          textShadow: '0 1px 6px rgba(0,0,0,0.55)',
+                          whiteSpace: 'nowrap',
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        {link.label}
+                      </span>
+                    </div>
+                  )}
+                </NavLink>
+              </div>
+            )
+          })}
+
+          {/* ── Center FAB ── */}
           <button
-            onClick={() => setOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-pink-400 shadow-sm border border-pink-100"
+            onClick={() => setOpen(o => !o)}
+            className={open ? '' : 'fab-idle'}
+            style={{
+              position: 'relative',
+              zIndex: 52,
+              width: 60,
+              height: 60,
+              borderRadius: '50%',
+              background: open
+                ? 'rgba(255,255,255,0.22)'
+                : 'linear-gradient(135deg, #ec4899 0%, #a855f7 100%)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: open
+                ? '1.5px solid rgba(255,255,255,0.55)'
+                : '1.5px solid rgba(255,255,255,0.35)',
+              boxShadow: open
+                ? '0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.5)'
+                : undefined,
+              transform: open ? 'scale(0.92)' : 'scale(1)',
+              transition: 'transform 0.45s cubic-bezier(0.34,1.56,0.64,1), background 0.35s ease, border-color 0.3s ease, box-shadow 0.35s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              outline: 'none',
+              pointerEvents: 'auto',
+            }}
           >
-            <X size={17} />
+            {/* Icon crossfade */}
+            <div style={{ position: 'relative', width: 22, height: 22 }}>
+              <Sparkles
+                size={20}
+                color="white"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  margin: 'auto',
+                  opacity: open ? 0 : 1,
+                  transform: open ? 'scale(0) rotate(-90deg)' : 'scale(1) rotate(0deg)',
+                  transition: 'opacity 0.25s ease, transform 0.3s ease',
+                }}
+              />
+              <X
+                size={20}
+                color="white"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  margin: 'auto',
+                  opacity: open ? 1 : 0,
+                  transform: open ? 'scale(1) rotate(0deg)' : 'scale(0) rotate(90deg)',
+                  transition: 'opacity 0.25s ease, transform 0.3s ease',
+                }}
+              />
+            </div>
           </button>
         </div>
-
-        {/* Grid */}
-        <nav className="px-4 grid grid-cols-2 gap-3">
-          {[...links, ...(profile?.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: '#f5f3ff' }] : [])].map(({ to, label, icon: Icon, end, color, bg }, idx) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              onClick={() => setOpen(false)}
-              className="block list-item-enter"
-              style={{ animationDelay: `${idx * 35}ms` }}
-            >
-              {({ isActive }) => (
-                <div
-                  className="flex items-center gap-3 rounded-2xl px-4 py-3.5 active:scale-[0.97]"
-                  style={{
-                    background: isActive ? bg : 'white',
-                    border: `1.5px solid ${isActive ? color + '60' : '#fce7f3'}`,
-                    boxShadow: isActive ? `0 4px 16px ${color}25` : '0 1px 4px rgba(0,0,0,0.04)',
-                    transition: 'background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease',
-                  }}
-                >
-                  <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                    style={{ background: bg, border: `1.5px solid ${color}40` }}
-                  >
-                    <Icon size={17} style={{ color }} />
-                  </div>
-                  <span className="text-sm font-semibold" style={{ color: isActive ? color : '#374151' }}>
-                    {label}
-                  </span>
-                </div>
-              )}
-            </NavLink>
-          ))}
-        </nav>
       </div>
     </>
   )
