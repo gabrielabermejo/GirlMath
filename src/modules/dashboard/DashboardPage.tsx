@@ -212,7 +212,7 @@ export default function DashboardPage() {
             }}
           >
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-400">Balance</p>
+              <p className="text-xs text-gray-400">Saldo acumulado</p>
               <div
                 className="flex h-7 w-7 items-center justify-center rounded-xl"
                 style={{ background: balance >= 0 ? '#dcfce7' : '#ffe4e6' }}

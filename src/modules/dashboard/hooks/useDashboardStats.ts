@@ -49,7 +49,44 @@ export function useDashboardStats() {
   )
 
   const totalExpenses = totalVariableExpenses + totalFixedExpenses
-  const balance = totalIncome - totalExpenses
+
+  // Saldo acumulado: suma de todos los ingresos y gastos hasta el mes seleccionado
+  const balance = useMemo(() => {
+    const cumIncome = allIncomes
+      .filter((i) => {
+        const d = new Date(i.date + 'T00:00:00')
+        return d.getFullYear() < filters.year ||
+          (d.getFullYear() === filters.year && d.getMonth() <= filters.month)
+      })
+      .reduce((s, i) => s + i.amount, 0)
+
+    const cumVarExpenses = allExpenses
+      .filter((e) => {
+        const d = new Date(e.date + 'T00:00:00')
+        return d.getFullYear() < filters.year ||
+          (d.getFullYear() === filters.year && d.getMonth() <= filters.month)
+      })
+      .reduce((s, e) => s + e.amount, 0)
+
+    const fixedMonthlyTotal = fixedExpenses.reduce((s, e) => s + e.amount, 0)
+    let cumFixedExpenses = fixedMonthlyTotal
+
+    if (fixedExpenses.length > 0) {
+      const allDates = [
+        ...allIncomes.map((i) => new Date(i.date + 'T00:00:00')),
+        ...allExpenses.map((e) => new Date(e.date + 'T00:00:00')),
+      ]
+      if (allDates.length > 0) {
+        const earliest = allDates.reduce((min, d) => (d < min ? d : min))
+        const monthsElapsed =
+          (filters.year - earliest.getFullYear()) * 12 +
+          (filters.month - earliest.getMonth()) + 1
+        cumFixedExpenses = fixedMonthlyTotal * Math.max(1, monthsElapsed)
+      }
+    }
+
+    return cumIncome - cumVarExpenses - cumFixedExpenses
+  }, [allIncomes, allExpenses, fixedExpenses, filters.month, filters.year])
 
   const savings = useMemo((): SavingsStats => {
     const goalAmount = totalIncome * (savingsGoal / 100)
