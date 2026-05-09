@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Plus, Pencil, Trash2, TrendingUp, ArrowUpDown } from 'lucide-react'
-import SwipeableRow from '../../components/ui/SwipeableRow'
+import SwipeableRow, { SwipeAction } from '../../components/ui/SwipeableRow'
 import Header from '../../components/layout/Header'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
@@ -116,10 +116,10 @@ export default function IncomePage() {
               {filtered.map((income) => (
                 <SwipeableRow
                   key={income.id}
-                  onEdit={() => openEdit(income)}
-                  onDelete={() => setDeleting(income)}
-                  editColor="#10b981"
-                  deleteColor="#a78bfa"
+                  actions={[
+                    { icon: <Pencil size={15} color="white" />, label: 'Editar',   color: '#10b981', onClick: () => openEdit(income) },
+                    { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(income) },
+                  ] satisfies SwipeAction[]}
                 >
                   <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
                     <div className="flex-1 min-w-0">

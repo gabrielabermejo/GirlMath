@@ -1,25 +1,24 @@
 import { useRef, useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+
+export interface SwipeAction {
+  icon: React.ReactNode
+  label: string
+  color: string
+  onClick: () => void
+}
 
 interface Props {
   children: React.ReactNode
-  onEdit?: () => void
-  onDelete: () => void
-  editColor?: string
-  deleteColor?: string
+  actions: SwipeAction[]
 }
 
-const ACTION_W = 120   // px revealed at full swipe
-const THRESHOLD = 48   // min drag to snap open
+const BTN_W     = 62    // px per action button
 const RESISTANCE = 0.25
 
-export default function SwipeableRow({
-  children,
-  onEdit,
-  onDelete,
-  editColor = '#ec4899',
-  deleteColor = '#a78bfa',
-}: Props) {
+export default function SwipeableRow({ children, actions }: Props) {
+  const ACTION_W  = actions.length * BTN_W
+  const THRESHOLD = ACTION_W * 0.4
+
   const [offset, setOffset] = useState(0)
   const [dragging, setDragging] = useState(false)
 
@@ -29,9 +28,9 @@ export default function SwipeableRow({
   const direction = useRef<'h' | 'v' | null>(null)
 
   function onTouchStart(e: React.TouchEvent) {
-    startX.current  = e.touches[0].clientX
-    startY.current  = e.touches[0].clientY
-    baseOff.current = offset
+    startX.current    = e.touches[0].clientX
+    startY.current    = e.touches[0].clientY
+    baseOff.current   = offset
     direction.current = null
     setDragging(true)
   }
@@ -50,9 +49,9 @@ export default function SwipeableRow({
     const raw = baseOff.current + dx
     let next: number
     if (raw < -ACTION_W) {
-      next = -ACTION_W + (raw + ACTION_W) * RESISTANCE   // rubber band past open
+      next = -ACTION_W + (raw + ACTION_W) * RESISTANCE
     } else if (raw > 0) {
-      next = raw * RESISTANCE                             // rubber band past closed
+      next = raw * RESISTANCE
     } else {
       next = raw
     }
@@ -61,7 +60,6 @@ export default function SwipeableRow({
 
   function onTouchEnd() {
     setDragging(false)
-    // Snap: if dragged past threshold from closed, open; otherwise close
     if (baseOff.current === 0 && offset < -THRESHOLD) {
       setOffset(-ACTION_W)
     } else if (baseOff.current === -ACTION_W && offset > -(ACTION_W - THRESHOLD)) {
@@ -71,15 +69,16 @@ export default function SwipeableRow({
     }
   }
 
-  function closeRow() {
-    if (offset !== 0) setOffset(0)
-  }
-
   const isOpen = offset < -THRESHOLD / 2
+
+  function handleActionClick(action: SwipeAction) {
+    setOffset(0)
+    action.onClick()
+  }
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Action buttons — revealed on swipe left */}
+      {/* Action buttons */}
       <div
         style={{
           position: 'absolute',
@@ -90,13 +89,14 @@ export default function SwipeableRow({
           display: 'flex',
         }}
       >
-        {onEdit && (
+        {actions.map((action, i) => (
           <button
+            key={i}
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={() => { onEdit(); closeRow() }}
+            onClick={() => handleActionClick(action)}
             style={{
               flex: 1,
-              background: editColor,
+              background: action.color,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -106,28 +106,10 @@ export default function SwipeableRow({
               cursor: 'pointer',
             }}
           >
-            <Pencil size={16} color="white" />
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>Editar</span>
+            {action.icon}
+            <span style={{ fontSize: 9, fontWeight: 700, color: 'white' }}>{action.label}</span>
           </button>
-        )}
-        <button
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => { onDelete(); closeRow() }}
-          style={{
-            flex: 1,
-            background: deleteColor,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 4,
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <Trash2 size={16} color="white" />
-          <span style={{ fontSize: 10, fontWeight: 700, color: 'white' }}>Eliminar</span>
-        </button>
+        ))}
       </div>
 
       {/* Slideable content */}
@@ -135,7 +117,7 @@ export default function SwipeableRow({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onClick={isOpen ? closeRow : undefined}
+        onClick={isOpen ? () => setOffset(0) : undefined}
         style={{
           transform: `translateX(${offset}px)`,
           transition: dragging ? 'none' : 'transform 0.32s cubic-bezier(0.25,1,0.5,1)',

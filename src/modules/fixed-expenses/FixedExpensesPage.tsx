@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, RepeatIcon, CalendarDays } from 'lucide-react'
+import SwipeableRow, { SwipeAction } from '../../components/ui/SwipeableRow'
 import Header from '../../components/layout/Header'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
@@ -74,8 +75,66 @@ export default function FixedExpensesPage() {
           </button>
         </div>
 
-        {/* List */}
-        <div className="card overflow-hidden">
+        {/* Mobile swipeable list */}
+        <div className="md:hidden card overflow-hidden">
+          {isLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+            </div>
+          ) : expenses.length === 0 ? (
+            <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">
+              <RepeatIcon size={32} />
+              <p className="text-sm">No hay gastos fijos registrados</p>
+              <p className="text-xs">Agrega tu plan de teléfono, suscripciones, etc.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-violet-50">
+              {expenses.map((expense) => (
+                <SwipeableRow
+                  key={expense.id}
+                  actions={[
+                    { icon: <Pencil size={15} color="white" />, label: 'Editar',   color: '#7c3aed', onClick: () => openEdit(expense) },
+                    { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(expense) },
+                  ] satisfies SwipeAction[]}
+                >
+                  <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <RepeatIcon size={12} className="shrink-0 text-violet-400" />
+                        <p className="text-sm font-semibold text-gray-900 truncate">{expense.description}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {expense.day_of_month && (
+                          <span className="text-xs text-gray-400">Día {expense.day_of_month}</span>
+                        )}
+                        <span
+                          className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
+                          style={{
+                            backgroundColor: CATEGORY_COLORS[expense.category] + '20',
+                            color: CATEGORY_COLORS[expense.category],
+                          }}
+                        >
+                          {CATEGORY_LABELS[expense.category]}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-violet-700 shrink-0">
+                      {formatCurrency(expense.amount)}<span className="text-xs font-normal text-gray-400">/mes</span>
+                    </span>
+                  </div>
+                </SwipeableRow>
+              ))}
+              {/* Total footer */}
+              <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-t-2 border-gray-200">
+                <span className="text-sm font-semibold text-gray-700">Total mensual</span>
+                <span className="text-sm font-bold text-violet-700">{formatCurrency(total)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block card overflow-hidden">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
@@ -88,73 +147,49 @@ export default function FixedExpensesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[500px]">
-              <thead className="border-b border-pink-50 bg-pink-50/40">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Descripción</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Categoría</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-500">Día de cobro</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-500">Monto/mes</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-500">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-pink-50">
-                {expenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-pink-50/30">
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      <div className="flex items-center gap-2">
-                        <RepeatIcon size={13} className="shrink-0 text-violet-400" />
-                        {expense.description}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
-                        style={{
-                          backgroundColor: CATEGORY_COLORS[expense.category] + '20',
-                          color: CATEGORY_COLORS[expense.category],
-                        }}
-                      >
-                        {CATEGORY_LABELS[expense.category]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500">
-                      {expense.day_of_month ? `Día ${expense.day_of_month}` : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-violet-700">
-                      {formatCurrency(expense.amount)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() => openEdit(expense)}
-                          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => setDeleting(expense)}
-                          className="rounded-lg p-1.5 text-gray-400 hover:bg-violet-50 hover:text-violet-400"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
+              <table className="w-full text-sm min-w-[500px]">
+                <thead className="border-b border-pink-50 bg-pink-50/40">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Descripción</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Categoría</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Día de cobro</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Monto/mes</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot className="border-t-2 border-gray-200 bg-gray-50">
-                <tr>
-                  <td colSpan={3} className="px-4 py-3 text-sm font-semibold text-gray-700">
-                    Total mensual
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm font-bold text-violet-700">
-                    {formatCurrency(total)}
-                  </td>
-                  <td />
-                </tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-pink-50">
+                  {expenses.map((expense) => (
+                    <tr key={expense.id} className="hover:bg-pink-50/30">
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        <div className="flex items-center gap-2">
+                          <RepeatIcon size={13} className="shrink-0 text-violet-400" />
+                          {expense.description}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: CATEGORY_COLORS[expense.category] + '20', color: CATEGORY_COLORS[expense.category] }}>
+                          {CATEGORY_LABELS[expense.category]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">{expense.day_of_month ? `Día ${expense.day_of_month}` : '—'}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-violet-700">{formatCurrency(expense.amount)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-1">
+                          <button onClick={() => openEdit(expense)} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"><Pencil size={14} /></button>
+                          <button onClick={() => setDeleting(expense)} className="rounded-lg p-1.5 text-gray-400 hover:bg-violet-50 hover:text-violet-400"><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="border-t-2 border-gray-200 bg-gray-50">
+                  <tr>
+                    <td colSpan={3} className="px-4 py-3 text-sm font-semibold text-gray-700">Total mensual</td>
+                    <td className="px-4 py-3 text-right text-sm font-bold text-violet-700">{formatCurrency(total)}</td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           )}
         </div>

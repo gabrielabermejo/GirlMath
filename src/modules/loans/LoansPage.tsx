@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Plus, Trash2, CheckCircle2, Clock, Banknote, HandCoins, Pencil } from 'lucide-react'
+import SwipeableRow, { SwipeAction } from '../../components/ui/SwipeableRow'
 import Header from '../../components/layout/Header'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
@@ -80,7 +81,53 @@ export default function LoansPage() {
         {/* Pending */}
         <div>
           <h2 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">Pendientes</h2>
-          <div className="card overflow-hidden">
+
+          {/* Mobile swipeable list */}
+          <div className="md:hidden card overflow-hidden">
+            {isLoading ? (
+              <div className="flex h-32 items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+              </div>
+            ) : pending.length === 0 ? (
+              <div className="flex h-32 flex-col items-center justify-center gap-2 text-gray-400">
+                <Banknote size={28} />
+                <p className="text-sm">Nadie te debe dinero 🎉</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-pink-50">
+                {pending.map((loan) => (
+                  <SwipeableRow
+                    key={loan.id}
+                    actions={[
+                      { icon: <Pencil size={15} color="white" />,       label: 'Editar',  color: '#ec4899', onClick: () => setEditing(loan) },
+                      { icon: <CheckCircle2 size={15} color="white" />, label: 'Pagado',  color: '#10b981', onClick: () => setConfirming(loan) },
+                      { icon: <Trash2 size={15} color="white" />,       label: 'Eliminar',color: '#a78bfa', onClick: () => setDeleting(loan) },
+                    ] satisfies SwipeAction[]}
+                  >
+                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{loan.person_name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-400">
+                            {format(new Date(loan.lent_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}
+                          </span>
+                          {loan.notes && (
+                            <span className="text-xs text-gray-400 truncate max-w-[120px]">{loan.notes}</span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-amber-500 shrink-0">
+                        {formatCurrency(loan.amount)}
+                      </span>
+                    </div>
+                  </SwipeableRow>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block card overflow-hidden">
             {isLoading ? (
               <div className="flex h-32 items-center justify-center">
                 <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
@@ -150,7 +197,42 @@ export default function LoansPage() {
         {paid.length > 0 && (
           <div>
             <h2 className="mb-3 text-sm font-semibold text-gray-500 uppercase tracking-wide">Pagados</h2>
-            <div className="card overflow-hidden">
+
+            {/* Mobile swipeable list */}
+            <div className="md:hidden card overflow-hidden">
+              <div className="divide-y divide-green-50">
+                {paid.map((loan) => (
+                  <SwipeableRow
+                    key={loan.id}
+                    actions={[
+                      { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(loan) },
+                    ] satisfies SwipeAction[]}
+                  >
+                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white opacity-70">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 size={12} className="shrink-0 text-emerald-400" />
+                          <p className="text-sm font-semibold text-gray-700 truncate">{loan.person_name}</p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-400">
+                            {loan.paid_date
+                              ? format(new Date(loan.paid_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })
+                              : format(new Date(loan.lent_date + 'T00:00:00'), 'dd MMM yyyy', { locale: es })}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-emerald-500 shrink-0">
+                        {formatCurrency(loan.amount)}
+                      </span>
+                    </div>
+                  </SwipeableRow>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[520px]">
                   <thead className="border-b border-pink-50 bg-pink-50/40">
