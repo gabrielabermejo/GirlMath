@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useCountUp } from '../../hooks/useCountUp'
 import { TrendingUp, TrendingDown, Wallet, RepeatIcon, PiggyBank, Pencil, Check, X, AlertTriangle, AlertCircle, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import Header from '../../components/layout/Header'
@@ -26,6 +27,17 @@ export default function DashboardPage() {
     expensesByCategory,
     monthlyBalances,
   } = useDashboardStats()
+
+  // Animated counters — re-trigger when values or filters change
+  const animBalance      = useCountUp(balance,                  900)
+  const animIncome       = useCountUp(totalIncome,              820)
+  const animVarExpenses  = useCountUp(totalVariableExpenses,    760)
+  const animFixedExp     = useCountUp(totalFixedExpenses,       700)
+  const animGoalAmount   = useCountUp(savings.goalAmount,       750)
+  const animTotalSpent   = useCountUp(savings.totalSpent,       800)
+  const animRemaining    = useCountUp(savings.remaining,        850)
+  const animSavedPct     = useCountUp(savings.savedPct,         780)
+  const animSavedAmount  = useCountUp(savings.savedAmount,      780)
 
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalDraft, setGoalDraft] = useState(String(savingsGoal))
@@ -193,7 +205,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <p className="text-base font-bold truncate" style={{ color: balance >= 0 ? '#16a34a' : '#e11d48' }}>
-              {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
+              {animBalance >= 0 ? '+' : ''}{formatCurrency(animBalance)}
             </p>
             <p className="text-xs mt-0.5" style={{ color: balance >= 0 ? '#86efac' : '#fca5a5' }}>
               {balance >= 0 ? 'Saldo positivo ✓' : 'Saldo negativo'}
@@ -208,7 +220,7 @@ export default function DashboardPage() {
                 <TrendingUp size={14} className="text-green-500" />
               </div>
             </div>
-            <p className="text-base font-bold text-green-500 truncate">{formatCurrency(totalIncome)}</p>
+            <p className="text-base font-bold text-green-500 truncate">{formatCurrency(animIncome)}</p>
             <p className="text-xs text-gray-300 mt-0.5">Este mes</p>
           </div>
 
@@ -220,7 +232,7 @@ export default function DashboardPage() {
                 <TrendingDown size={14} className="text-pink-400" />
               </div>
             </div>
-            <p className="text-base font-bold text-pink-500 truncate">{formatCurrency(totalVariableExpenses)}</p>
+            <p className="text-base font-bold text-pink-500 truncate">{formatCurrency(animVarExpenses)}</p>
             <p className="text-xs text-gray-300 mt-0.5">Variables</p>
           </div>
 
@@ -232,7 +244,7 @@ export default function DashboardPage() {
                 <RepeatIcon size={14} className="text-violet-400" />
               </div>
             </div>
-            <p className="text-base font-bold text-violet-500 truncate">{formatCurrency(totalFixedExpenses)}</p>
+            <p className="text-base font-bold text-violet-500 truncate">{formatCurrency(animFixedExp)}</p>
             <p className="text-xs text-gray-300 mt-0.5">Recurrentes</p>
           </div>
         </div>
@@ -333,10 +345,10 @@ export default function DashboardPage() {
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 mb-5 relative z-10">
             {[
-              { label: 'Meta ahorro',   value: formatCurrency(savings.goalAmount),  sub: `${savingsGoal}% del ingreso`, color: '#ec4899' },
-              { label: 'Total gastado', value: formatCurrency(savings.totalSpent),   sub: 'Variables + fijos',           color: '#a855f7' },
-              { label: 'Disponible',    value: formatCurrency(savings.remaining),    sub: savings.remaining >= 0 ? 'Puedes gastar más' : 'Te excediste', color: savings.remaining >= 0 ? '#10b981' : '#f97316' },
-              { label: 'Ahorro real',   value: `${savings.savedPct.toFixed(0)}%`,    sub: formatCurrency(savings.savedAmount), color: savings.savedPct >= savingsGoal ? '#10b981' : '#8b5cf6' },
+              { label: 'Meta ahorro',   value: formatCurrency(animGoalAmount),  sub: `${savingsGoal}% del ingreso`, color: '#ec4899' },
+              { label: 'Total gastado', value: formatCurrency(animTotalSpent),   sub: 'Variables + fijos',           color: '#a855f7' },
+              { label: 'Disponible',    value: formatCurrency(animRemaining),    sub: savings.remaining >= 0 ? 'Puedes gastar más' : 'Te excediste', color: savings.remaining >= 0 ? '#10b981' : '#f97316' },
+              { label: 'Ahorro real',   value: `${animSavedPct.toFixed(0)}%`,    sub: formatCurrency(animSavedAmount), color: savings.savedPct >= savingsGoal ? '#10b981' : '#8b5cf6' },
             ].map((stat) => (
               <div
                 key={stat.label}
