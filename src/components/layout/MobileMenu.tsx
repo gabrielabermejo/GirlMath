@@ -19,26 +19,8 @@ const links = [
   { to: '/calendario',   label: 'Calendario',   icon: CalendarDays,    end: false, color: '#2dd4bf', bg: 'rgba(240,253,250,0.95)' },
 ]
 
-// Two-ring layout — avoids crowding when labels are long:
-//   Ring 1 (inner, indices 0-4): radius 115px, 40° apart → ~80px arc gap ✓
-//   Ring 2 (outer, indices 5-8): radius 170px, 40° apart → ~118px arc gap ✓
-//   Ring 2 angles are offset 20° from ring 1, filling the visual gaps (flower pattern)
-// A 10th item (admin) sits at the top of the outer ring (90°).
-const deg = (a: number) => (a * Math.PI) / 180
-const pos = (r: number, a: number) => ({
-  tx: Math.round(r * Math.cos(deg(a))),
-  ty: Math.round(-r * Math.sin(deg(a))),
-})
-
-const RING1_ANGLES = [170, 130, 90, 50, 10]   // 5 inner slots
-const RING2_ANGLES = [150, 110, 70, 30]        // 4 outer slots (fills ring-1 gaps)
-const ADMIN_POS    = pos(170, 90)              // top of outer ring
-
-const POSITIONS = [
-  ...RING1_ANGLES.map(a => pos(115, a)),
-  ...RING2_ANGLES.map(a => pos(170, a)),
-  ADMIN_POS,
-]
+// Vertical spacing between item centers (px)
+const STEP = 62
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
@@ -89,7 +71,7 @@ export default function MobileMenu() {
         }}
       />
 
-      {/* FAB + radial items */}
+      {/* FAB + vertical items */}
       <div
         className="md:hidden fixed bottom-0 inset-x-0 z-50 flex justify-center"
         style={{
@@ -98,17 +80,14 @@ export default function MobileMenu() {
           pointerEvents: 'none',
         }}
       >
-        {/* 60×60 anchor — top:50%/left:50% on children maps to button center */}
+        {/* 60×60 anchor — items are positioned relative to button center */}
         <div style={{ position: 'relative', width: 60, height: 60 }}>
 
-          {/* ── Radial items ── */}
+          {/* ── Vertical column items (bottom = index 0, top = last) ── */}
           {allLinks.map((link, i) => {
-            const { tx, ty } = POSITIONS[i] ?? pos(115, 90)
-
-            // Ring 1 (0-4) opens first, ring 2 (5+) follows 60ms later
-            const ring2 = i >= 5
-            const openDelay  = ring2 ? 60 + (i - 5) * 38 : i * 38
-            const closeDelay = ring2 ? (allLinks.length - 1 - i) * 22 : 60 + (4 - i) * 22
+            const ty = -STEP * (i + 1)   // straight up, evenly spaced
+            const openDelay  = i * 38             // bottom item first
+            const closeDelay = (allLinks.length - 1 - i) * 28  // top item closes first
 
             return (
               <div
@@ -118,26 +97,32 @@ export default function MobileMenu() {
                   top: '50%',
                   left: '50%',
                   transform: open
-                    ? `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1)`
+                    ? `translate(-50%, calc(-50% + ${ty}px)) scale(1)`
                     : 'translate(-50%, -50%) scale(0)',
                   opacity: open ? 1 : 0,
                   transition: open
-                    ? `transform 0.55s cubic-bezier(0.34,1.56,0.64,1) ${openDelay}ms, opacity 0.28s ease ${openDelay * 0.5}ms`
-                    : `transform 0.28s cubic-bezier(0.55,0,1,0.45) ${closeDelay}ms, opacity 0.18s ease ${closeDelay}ms`,
+                    ? `transform 0.52s cubic-bezier(0.34,1.56,0.64,1) ${openDelay}ms, opacity 0.25s ease ${openDelay * 0.5}ms`
+                    : `transform 0.26s cubic-bezier(0.55,0,1,0.45) ${closeDelay}ms, opacity 0.18s ease ${closeDelay}ms`,
                   pointerEvents: open ? 'auto' : 'none',
                   zIndex: 51,
                 }}
               >
                 <NavLink to={link.to} end={link.end} onClick={() => setOpen(false)}>
                   {({ isActive }) => (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, userSelect: 'none' }}>
-
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap',
+                    }}>
                       {/* Glass circle */}
                       <div
                         style={{
-                          width: 50,
-                          height: 50,
+                          width: 48,
+                          height: 48,
                           borderRadius: '50%',
+                          flexShrink: 0,
                           background: isActive ? link.bg : 'rgba(255,255,255,0.82)',
                           backdropFilter: 'blur(20px)',
                           WebkitBackdropFilter: 'blur(20px)',
@@ -150,18 +135,17 @@ export default function MobileMenu() {
                           justifyContent: 'center',
                         }}
                       >
-                        <link.icon size={19} style={{ color: isActive ? link.color : '#6b7280' }} />
+                        <link.icon size={18} style={{ color: isActive ? link.color : '#6b7280' }} />
                       </div>
 
-                      {/* Label */}
+                      {/* Label to the right of circle */}
                       <span
                         style={{
-                          fontSize: 9,
+                          fontSize: 13,
                           fontWeight: 700,
                           color: 'white',
-                          textShadow: '0 1px 6px rgba(0,0,0,0.55)',
-                          whiteSpace: 'nowrap',
-                          letterSpacing: '0.04em',
+                          textShadow: '0 1px 8px rgba(0,0,0,0.6)',
+                          letterSpacing: '0.01em',
                         }}
                       >
                         {link.label}
