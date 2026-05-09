@@ -19,10 +19,26 @@ const links = [
   { to: '/calendario',   label: 'Calendario',   icon: CalendarDays,    end: false, color: '#2dd4bf', bg: 'rgba(240,253,250,0.95)' },
 ]
 
-// Compute radial arc positions: 150° arc centered at top (90°), radius 130px
-const ARC_DEG = 150
-const RADIUS = 130
-const START_ANGLE = 90 + ARC_DEG / 2 // 165°
+// Two-ring layout — avoids crowding when labels are long:
+//   Ring 1 (inner, indices 0-4): radius 115px, 40° apart → ~80px arc gap ✓
+//   Ring 2 (outer, indices 5-8): radius 170px, 40° apart → ~118px arc gap ✓
+//   Ring 2 angles are offset 20° from ring 1, filling the visual gaps (flower pattern)
+// A 10th item (admin) sits at the top of the outer ring (90°).
+const deg = (a: number) => (a * Math.PI) / 180
+const pos = (r: number, a: number) => ({
+  tx: Math.round(r * Math.cos(deg(a))),
+  ty: Math.round(-r * Math.sin(deg(a))),
+})
+
+const RING1_ANGLES = [170, 130, 90, 50, 10]   // 5 inner slots
+const RING2_ANGLES = [150, 110, 70, 30]        // 4 outer slots (fills ring-1 gaps)
+const ADMIN_POS    = pos(170, 90)              // top of outer ring
+
+const POSITIONS = [
+  ...RING1_ANGLES.map(a => pos(115, a)),
+  ...RING2_ANGLES.map(a => pos(170, a)),
+  ADMIN_POS,
+]
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
@@ -34,8 +50,6 @@ export default function MobileMenu() {
       ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, end: false, color: '#a78bfa', bg: 'rgba(245,243,255,0.95)' }]
       : []),
   ]
-
-  const count = allLinks.length
 
   return (
     <>
@@ -61,7 +75,7 @@ export default function MobileMenu() {
         onClick={() => setOpen(false)}
       />
 
-      {/* Bottom bar glass strip */}
+      {/* Glass bottom strip */}
       <div
         className="md:hidden fixed bottom-0 inset-x-0 z-50"
         style={{
@@ -84,18 +98,17 @@ export default function MobileMenu() {
           pointerEvents: 'none',
         }}
       >
-        {/* Anchor: same size as button so top:50%/left:50% maps to button center */}
+        {/* 60×60 anchor — top:50%/left:50% on children maps to button center */}
         <div style={{ position: 'relative', width: 60, height: 60 }}>
 
           {/* ── Radial items ── */}
           {allLinks.map((link, i) => {
-            const angleDeg = START_ANGLE - i * (ARC_DEG / (count - 1))
-            const angleRad = (angleDeg * Math.PI) / 180
-            const tx = Math.round(RADIUS * Math.cos(angleRad))
-            const ty = Math.round(-RADIUS * Math.sin(angleRad))
+            const { tx, ty } = POSITIONS[i] ?? pos(115, 90)
 
-            const openDelay  = i * 38
-            const closeDelay = (count - 1 - i) * 22
+            // Ring 1 (0-4) opens first, ring 2 (5+) follows 60ms later
+            const ring2 = i >= 5
+            const openDelay  = ring2 ? 60 + (i - 5) * 38 : i * 38
+            const closeDelay = ring2 ? (allLinks.length - 1 - i) * 22 : 60 + (4 - i) * 22
 
             return (
               <div
@@ -109,8 +122,8 @@ export default function MobileMenu() {
                     : 'translate(-50%, -50%) scale(0)',
                   opacity: open ? 1 : 0,
                   transition: open
-                    ? `transform 0.55s cubic-bezier(0.34,1.56,0.64,1) ${openDelay}ms, opacity 0.28s ease ${openDelay * 0.6}ms`
-                    : `transform 0.28s cubic-bezier(0.55,0,1,0.45) ${closeDelay}ms, opacity 0.18s ease`,
+                    ? `transform 0.55s cubic-bezier(0.34,1.56,0.64,1) ${openDelay}ms, opacity 0.28s ease ${openDelay * 0.5}ms`
+                    : `transform 0.28s cubic-bezier(0.55,0,1,0.45) ${closeDelay}ms, opacity 0.18s ease ${closeDelay}ms`,
                   pointerEvents: open ? 'auto' : 'none',
                   zIndex: 51,
                 }}
@@ -118,6 +131,7 @@ export default function MobileMenu() {
                 <NavLink to={link.to} end={link.end} onClick={() => setOpen(false)}>
                   {({ isActive }) => (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, userSelect: 'none' }}>
+
                       {/* Glass circle */}
                       <div
                         style={{
@@ -134,7 +148,6 @@ export default function MobileMenu() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          transition: 'box-shadow 0.15s ease',
                         }}
                       >
                         <link.icon size={19} style={{ color: isActive ? link.color : '#6b7280' }} />
@@ -191,7 +204,6 @@ export default function MobileMenu() {
               pointerEvents: 'auto',
             }}
           >
-            {/* Icon crossfade */}
             <div style={{ position: 'relative', width: 22, height: 22 }}>
               <Sparkles
                 size={20}
