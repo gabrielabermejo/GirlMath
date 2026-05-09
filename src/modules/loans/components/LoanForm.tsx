@@ -1,7 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateLoan } from '../hooks/useMutateLoans'
+import { useCreateLoan, useUpdateLoan } from '../hooks/useMutateLoans'
+import { Loan } from '../../../types'
 
 const schema = z.object({
   person_name: z.string().min(1, 'El nombre es requerido'),
@@ -14,27 +15,48 @@ type FormValues = z.infer<typeof schema>
 
 interface Props {
   onClose: () => void
+  initialData?: Loan
 }
 
-export default function LoanForm({ onClose }: Props) {
+export default function LoanForm({ onClose, initialData }: Props) {
   const createLoan = useCreateLoan()
+  const updateLoan = useUpdateLoan()
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      lent_date: new Date().toISOString().slice(0, 10),
-    },
+    defaultValues: initialData
+      ? {
+          person_name: initialData.person_name,
+          amount: initialData.amount,
+          lent_date: initialData.lent_date,
+          notes: initialData.notes ?? '',
+        }
+      : {
+          lent_date: new Date().toISOString().slice(0, 10),
+        },
   })
 
   async function onSubmit(values: FormValues) {
-    await createLoan.mutateAsync({
-      person_name: values.person_name,
-      amount: values.amount,
-      lent_date: values.lent_date,
-      notes: values.notes || null,
-    })
+    if (initialData) {
+      await updateLoan.mutateAsync({
+        id: initialData.id,
+        person_name: values.person_name,
+        amount: values.amount,
+        lent_date: values.lent_date,
+        notes: values.notes || null,
+      })
+    } else {
+      await createLoan.mutateAsync({
+        person_name: values.person_name,
+        amount: values.amount,
+        lent_date: values.lent_date,
+        notes: values.notes || null,
+      })
+    }
     onClose()
   }
+
+  const isPending = createLoan.isPending || updateLoan.isPending
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -80,8 +102,8 @@ export default function LoanForm({ onClose }: Props) {
         <button type="button" className="btn-secondary" onClick={onClose}>
           Cancelar
         </button>
-        <button type="submit" className="btn-primary" disabled={createLoan.isPending}>
-          {createLoan.isPending ? 'Guardando...' : 'Registrar préstamo'}
+        <button type="submit" className="btn-primary" disabled={isPending}>
+          {isPending ? 'Guardando...' : initialData ? 'Guardar cambios' : 'Registrar préstamo'}
         </button>
       </div>
     </form>

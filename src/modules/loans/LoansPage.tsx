@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Plus, Trash2, CheckCircle2, Clock, Banknote, HandCoins } from 'lucide-react'
+import { Plus, Trash2, CheckCircle2, Clock, Banknote, HandCoins, Pencil } from 'lucide-react'
 import Header from '../../components/layout/Header'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
@@ -18,6 +18,7 @@ export default function LoansPage() {
   const deleteLoan = useDeleteLoan()
 
   const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Loan | null>(null)
   const [deleting, setDeleting] = useState<Loan | null>(null)
   const [confirming, setConfirming] = useState<Loan | null>(null)
 
@@ -115,6 +116,13 @@ export default function LoansPage() {
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-1">
                             <button
+                              onClick={() => setEditing(loan)}
+                              title="Editar préstamo"
+                              className="rounded-lg p-1.5 text-gray-400 hover:bg-pink-50 hover:text-pink-400 transition"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button
                               onClick={() => setConfirming(loan)}
                               title="Marcar como pagado"
                               className="rounded-lg p-1.5 text-gray-400 hover:bg-emerald-50 hover:text-emerald-500 transition"
@@ -191,6 +199,10 @@ export default function LoansPage() {
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo préstamo">
         <LoanForm onClose={() => setModalOpen(false)} />
+      </Modal>
+
+      <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Editar préstamo">
+        {editing && <LoanForm onClose={() => setEditing(null)} initialData={editing} />}
       </Modal>
 
       <ConfirmDialog

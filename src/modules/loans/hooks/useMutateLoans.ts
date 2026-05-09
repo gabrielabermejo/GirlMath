@@ -65,6 +65,27 @@ export function useMarkLoanPaid() {
   })
 }
 
+export function useUpdateLoan() {
+  const { user } = useAuth()
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...payload }: { id: string } & LoanPayload) => {
+      const { error } = await supabase
+        .from('loans')
+        .update(payload)
+        .eq('id', id)
+        .eq('user_id', user!.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['loans', user?.id] })
+      toast.success('Préstamo actualizado')
+    },
+    onError: () => toast.error('Error al actualizar préstamo'),
+  })
+}
+
 export function useDeleteLoan() {
   const { user } = useAuth()
   const qc = useQueryClient()
