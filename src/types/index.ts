@@ -116,6 +116,18 @@ export interface Loan {
   created_at: string
 }
 
+export interface Debt {
+  id: string
+  user_id: string
+  creditor_name: string
+  amount: number
+  due_date: string | null
+  description: string | null
+  status: 'pending' | 'paid'
+  paid_date: string | null
+  created_at: string
+}
+
 export interface Saving {
   id: string
   user_id: string

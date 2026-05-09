@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
   RepeatIcon, HandCoins, Landmark, Sparkles, X,
-  ArrowUpDown, ShieldCheck, CalendarDays, PiggyBank,
+  ArrowUpDown, ShieldCheck, CalendarDays, PiggyBank, CreditCard,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
@@ -16,6 +16,7 @@ const links = [
   { to: '/prestamos',    label: 'Préstamos',    icon: HandCoins,       end: false, color: '#f59e0b', bg: 'rgba(255,251,235,0.95)' },
   { to: '/cuentas',      label: 'Cuentas',      icon: Landmark,        end: false, color: '#60a5fa', bg: 'rgba(239,246,255,0.95)' },
   { to: '/ahorro',       label: 'Ahorros',      icon: PiggyBank,       end: false, color: '#ec4899', bg: 'rgba(253,242,248,0.95)' },
+  { to: '/deudas',      label: 'Mis deudas',   icon: CreditCard,      end: false, color: '#f43f5e', bg: 'rgba(255,241,242,0.95)' },
   { to: '/movimientos',  label: 'Movimientos',  icon: ArrowUpDown,     end: false, color: '#f472b6', bg: 'rgba(253,242,248,0.95)' },
   { to: '/calendario',   label: 'Calendario',   icon: CalendarDays,    end: false, color: '#2dd4bf', bg: 'rgba(240,253,250,0.95)' },
 ]
