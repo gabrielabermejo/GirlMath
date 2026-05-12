@@ -1,10 +1,68 @@
 import { useState } from 'react'
-import { TrendingUp, TrendingDown, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { TrendingUp, TrendingDown, LayoutDashboard, PiggyBank, HandCoins, CreditCard } from 'lucide-react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { useAuth } from '../context/AuthContext'
 import Modal from '../components/ui/Modal'
 import IncomeForm from '../modules/income/components/IncomeForm'
 import ExpenseForm from '../modules/expenses/components/ExpenseForm'
 import NotificationBell from '../components/ui/NotificationBell'
+
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return { text: 'Buenos días', emoji: '🌅' }
+  if (h >= 12 && h < 19) return { text: 'Buenas tardes', emoji: '☀️' }
+  return { text: 'Buenas noches', emoji: '🌙' }
+}
+
+const shortcuts = [
+  { to: '/dashboard',  label: 'Dashboard', icon: LayoutDashboard, color: '#c084fc', bg: 'rgba(245,243,255,0.88)' },
+  { to: '/gastos',     label: 'Gastos',    icon: TrendingDown,    color: '#f472b6', bg: 'rgba(253,242,248,0.88)' },
+  { to: '/ingresos',   label: 'Ingresos',  icon: TrendingUp,      color: '#34d399', bg: 'rgba(240,253,244,0.88)' },
+  { to: '/ahorro',     label: 'Ahorros',   icon: PiggyBank,       color: '#f59e0b', bg: 'rgba(255,251,235,0.88)' },
+  { to: '/prestamos',  label: 'Préstamos', icon: HandCoins,       color: '#60a5fa', bg: 'rgba(239,246,255,0.88)' },
+  { to: '/deudas',     label: 'Deudas',    icon: CreditCard,      color: '#f43f5e', bg: 'rgba(255,241,242,0.88)' },
+]
+
+function ShortcutChip({ to, label, icon: Icon, color, bg }: typeof shortcuts[0]) {
+  const navigate = useNavigate()
+  const [pressed, setPressed] = useState(false)
+
+  return (
+    <button
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => { setPressed(false); navigate(to) }}
+      onPointerLeave={() => setPressed(false)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 5,
+        padding: '10px 12px',
+        borderRadius: 16,
+        background: bg,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: `1px solid ${color}30`,
+        boxShadow: pressed
+          ? `0 2px 8px ${color}22`
+          : `0 4px 16px ${color}25, inset 0 1px 0 rgba(255,255,255,0.8)`,
+        transform: pressed ? 'scale(0.9)' : 'scale(1)',
+        transition: pressed
+          ? 'transform 0.08s ease, box-shadow 0.08s ease'
+          : 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease',
+        cursor: 'pointer',
+        outline: 'none',
+        minWidth: 62,
+        flex: 1,
+      }}
+    >
+      <Icon size={18} style={{ color }} />
+      <span style={{ fontSize: 10, fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap' }}>{label}</span>
+    </button>
+  )
+}
 
 export default function HomePage() {
   const { profile } = useAuth()
@@ -14,6 +72,8 @@ export default function HomePage() {
   const [expensePressed, setExpensePressed] = useState(false)
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'hola'
+  const greeting = getGreeting()
+  const today = format(new Date(), "EEEE d 'de' MMMM", { locale: es })
 
   return (
     <>
@@ -26,56 +86,23 @@ export default function HomePage() {
           from { opacity: 0; transform: translateY(28px) scale(0.93); }
           to   { opacity: 1; transform: translateY(0px) scale(1); }
         }
-        .home-card-income { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both; }
+        @keyframes chip-in {
+          from { opacity: 0; transform: translateY(14px) scale(0.95); }
+          to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+        .home-card-income  { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s  both; }
         .home-card-expense { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.22s both; }
+        .shortcut-row      { animation: chip-in      0.5s  cubic-bezier(0.34,1.3, 0.64,1) 0.35s both; }
       `}</style>
 
       <div
         className="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] p-5 md:p-8 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, #fdf2f8 0%, #f5f3ff 45%, #fdf4ff 100%)',
-        }}
+        style={{ background: 'linear-gradient(160deg, #fdf2f8 0%, #f5f3ff 45%, #fdf4ff 100%)' }}
       >
         {/* Floating background orbs */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '8%',
-            left: '12%',
-            width: 200,
-            height: 200,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249,168,212,0.28) 0%, transparent 70%)',
-            animation: 'float-orb 7s ease-in-out infinite',
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '14%',
-            right: '10%',
-            width: 160,
-            height: 160,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)',
-            animation: 'float-orb 9s ease-in-out infinite 1.5s',
-            pointerEvents: 'none',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '55%',
-            left: '5%',
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%)',
-            animation: 'float-orb 6s ease-in-out infinite 0.8s',
-            pointerEvents: 'none',
-          }}
-        />
+        <div style={{ position:'absolute', top:'8%',  left:'12%',  width:200, height:200, borderRadius:'50%', background:'radial-gradient(circle, rgba(249,168,212,0.28) 0%, transparent 70%)', animation:'float-orb 7s ease-in-out infinite', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', bottom:'14%', right:'10%', width:160, height:160, borderRadius:'50%', background:'radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)', animation:'float-orb 9s ease-in-out infinite 1.5s', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:'55%', left:'5%',   width:100, height:100, borderRadius:'50%', background:'radial-gradient(circle, rgba(52,211,153,0.18) 0%, transparent 70%)', animation:'float-orb 6s ease-in-out infinite 0.8s', pointerEvents:'none' }} />
 
         {/* Notification bell */}
         <div className="absolute top-0 right-0 p-2" style={{ zIndex: 10 }}>
@@ -83,18 +110,25 @@ export default function HomePage() {
         </div>
 
         {/* Greeting */}
-        <div className="mb-12 text-center" style={{ position: 'relative', zIndex: 5 }}>
+        <div className="mb-10 text-center" style={{ position: 'relative', zIndex: 5 }}>
+          {/* Date chip */}
           <div
-            className="inline-flex items-center justify-center h-16 w-16 rounded-2xl mb-4"
+            className="inline-flex items-center gap-1.5 mb-5 px-3 py-1.5 rounded-full text-xs font-medium text-gray-500"
             style={{
-              background: 'linear-gradient(135deg, #f9a8d4, #c084fc)',
-              boxShadow: '0 8px 28px rgba(236,72,153,0.35), inset 0 1px 0 rgba(255,255,255,0.45)',
+              background: 'rgba(255,255,255,0.72)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.9)',
+              boxShadow: '0 2px 12px rgba(236,72,153,0.1)',
+              textTransform: 'capitalize',
             }}
           >
-            <Sparkles size={28} className="text-white" />
+            <span>{greeting.emoji}</span>
+            <span>{today}</span>
           </div>
+
           <h1 className="text-3xl font-bold text-gray-700 mb-2">
-            Hola,{' '}
+            {greeting.text},{' '}
             <span className="bg-gradient-to-r from-pink-500 to-violet-400 bg-clip-text text-transparent capitalize">
               {firstName}
             </span>{' '}
@@ -135,36 +169,8 @@ export default function HomePage() {
               overflow: 'hidden',
             }}
           >
-            {/* Gloss highlight */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '45%',
-                borderRadius: '28px 28px 60% 60%',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)',
-                pointerEvents: 'none',
-              }}
-            />
-            <div
-              style={{
-                width: 68,
-                height: 68,
-                borderRadius: 20,
-                background: 'linear-gradient(135deg, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.35) 100%)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1.5px solid rgba(52,211,153,0.4)',
-                boxShadow: '0 4px 16px rgba(52,211,153,0.25), inset 0 1px 0 rgba(255,255,255,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                transition: 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-              }}
-            >
+            <div style={{ position:'absolute', top:0, left:0, right:0, height:'45%', borderRadius:'28px 28px 60% 60%', background:'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)', pointerEvents:'none' }} />
+            <div style={{ width:68, height:68, borderRadius:20, background:'linear-gradient(135deg, rgba(52,211,153,0.25) 0%, rgba(16,185,129,0.35) 100%)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', border:'1.5px solid rgba(52,211,153,0.4)', boxShadow:'0 4px 16px rgba(52,211,153,0.25), inset 0 1px 0 rgba(255,255,255,0.7)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
               <TrendingUp size={28} style={{ color: '#10b981' }} />
             </div>
             <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
@@ -200,35 +206,8 @@ export default function HomePage() {
               overflow: 'hidden',
             }}
           >
-            {/* Gloss highlight */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '45%',
-                borderRadius: '28px 28px 60% 60%',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)',
-                pointerEvents: 'none',
-              }}
-            />
-            <div
-              style={{
-                width: 68,
-                height: 68,
-                borderRadius: 20,
-                background: 'linear-gradient(135deg, rgba(251,113,133,0.22) 0%, rgba(236,72,153,0.32) 100%)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1.5px solid rgba(251,113,133,0.4)',
-                boxShadow: '0 4px 16px rgba(236,72,153,0.22), inset 0 1px 0 rgba(255,255,255,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
+            <div style={{ position:'absolute', top:0, left:0, right:0, height:'45%', borderRadius:'28px 28px 60% 60%', background:'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)', pointerEvents:'none' }} />
+            <div style={{ width:68, height:68, borderRadius:20, background:'linear-gradient(135deg, rgba(251,113,133,0.22) 0%, rgba(236,72,153,0.32) 100%)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', border:'1.5px solid rgba(251,113,133,0.4)', boxShadow:'0 4px 16px rgba(236,72,153,0.22), inset 0 1px 0 rgba(255,255,255,0.7)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
               <TrendingDown size={28} style={{ color: '#ec4899' }} />
             </div>
             <div className="text-center" style={{ position: 'relative', zIndex: 1 }}>
@@ -238,13 +217,34 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Hint */}
-        <p className="mt-10 text-xs text-pink-300" style={{ position: 'relative', zIndex: 5 }}>
-          Usa el menú para ver tu dashboard y reportes
-        </p>
+        {/* Quick-access shortcuts — docked to bottom */}
+        <div
+          className="shortcut-row absolute inset-x-0 flex justify-center"
+          style={{
+            bottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 16px)',
+            zIndex: 5,
+            padding: '0 20px',
+          }}
+        >
+          <div
+            className="flex gap-2 w-full max-w-sm"
+            style={{
+              padding: '10px 14px',
+              borderRadius: 22,
+              background: 'rgba(255,255,255,0.55)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,0.85)',
+              boxShadow: '0 8px 32px rgba(236,72,153,0.1), inset 0 1px 0 rgba(255,255,255,0.9)',
+            }}
+          >
+            {shortcuts.map((s) => (
+              <ShortcutChip key={s.to} {...s} />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Modals */}
       <Modal isOpen={incomeOpen} onClose={() => setIncomeOpen(false)} title="Nuevo ingreso">
         <IncomeForm onClose={() => setIncomeOpen(false)} />
       </Modal>
