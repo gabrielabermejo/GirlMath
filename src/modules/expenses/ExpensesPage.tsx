@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import ExpenseForm from './components/ExpenseForm'
+import SkeletonRows from '../../components/ui/SkeletonRows'
 import { useExpenses } from './hooks/useExpenses'
 import { useDeleteExpense } from './hooks/useMutateExpense'
 import { useFilters } from '../../context/FiltersContext'
@@ -123,9 +124,7 @@ export default function ExpensesPage() {
         {/* Mobile swipeable list */}
         <div className="md:hidden card overflow-hidden">
           {isLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
-            </div>
+            <SkeletonRows count={5} />
           ) : filtered.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">
               <TrendingDown size={32} />
@@ -133,7 +132,7 @@ export default function ExpensesPage() {
             </div>
           ) : (
             <div className="divide-y divide-pink-50">
-              {filtered.map((expense) => (
+              {filtered.map((expense, i) => (
                 <SwipeableRow
                   key={expense.id}
                   actions={[
@@ -141,7 +140,7 @@ export default function ExpensesPage() {
                     { icon: <Trash2 size={15} color="white" />, label: 'Eliminar',  color: '#a78bfa', onClick: () => setDeleting(expense) },
                   ] satisfies SwipeAction[]}
                 >
-                  <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                  <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{expense.description}</p>
                       <div className="flex items-center gap-2 mt-1">

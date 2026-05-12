@@ -6,6 +6,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import FixedExpenseForm from './components/FixedExpenseForm'
+import SkeletonRows from '../../components/ui/SkeletonRows'
 import { useFixedExpenses } from './hooks/useFixedExpenses'
 import { useDeleteFixedExpense } from './hooks/useMutateFixedExpense'
 import { FixedExpense, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types'
@@ -78,9 +79,7 @@ export default function FixedExpensesPage() {
         {/* Mobile swipeable list */}
         <div className="md:hidden card overflow-hidden">
           {isLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
-            </div>
+            <SkeletonRows count={4} />
           ) : expenses.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">
               <RepeatIcon size={32} />
@@ -89,7 +88,7 @@ export default function FixedExpensesPage() {
             </div>
           ) : (
             <div className="divide-y divide-violet-50">
-              {expenses.map((expense) => (
+              {expenses.map((expense, i) => (
                 <SwipeableRow
                   key={expense.id}
                   actions={[
@@ -97,7 +96,7 @@ export default function FixedExpensesPage() {
                     { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(expense) },
                   ] satisfies SwipeAction[]}
                 >
-                  <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                  <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <RepeatIcon size={12} className="shrink-0 text-violet-400" />

@@ -27,7 +27,10 @@ const iconWrap = {
 
 export default function StatCard({ label, value, subtext, icon, variant = 'default' }: Props) {
   return (
-    <div className={clsx('rounded-2xl border p-5 shadow-sm', card[variant])}>
+    <div
+      className={clsx('rounded-2xl border p-5 shadow-sm select-none active:scale-[0.96]', card[variant])}
+      style={{ transition: 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1)', willChange: 'transform' }}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide opacity-60">{label}</p>
