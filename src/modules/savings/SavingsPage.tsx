@@ -9,6 +9,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import SavingsForm from './components/SavingsForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useSavings } from './hooks/useSavings'
 import { useDeleteSaving } from './hooks/useMutateSavings'
 import { Saving } from '../../types'
@@ -72,7 +73,7 @@ export default function SavingsPage() {
 
         {/* Toolbar */}
         <div className="flex justify-end">
-          <button className="btn-primary" onClick={() => setModalOpen(true)}>
+          <button className="hidden md:flex btn-primary" onClick={() => setModalOpen(true)}>
             <Plus size={16} />
             Apartar ahorro
           </button>
@@ -182,6 +183,8 @@ export default function SavingsPage() {
           )}
         </div>
       </div>
+
+      <FAB onClick={() => setModalOpen(true)} color1="#34d399" color2="#059669" glow="rgba(52,211,153,0.45)" />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Apartar ahorro">
         <SavingsForm onClose={() => setModalOpen(false)} />

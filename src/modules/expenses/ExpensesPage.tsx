@@ -9,6 +9,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import ExpenseForm from './components/ExpenseForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useExpenses } from './hooks/useExpenses'
 import { useDeleteExpense } from './hooks/useMutateExpense'
 import { useFilters } from '../../context/FiltersContext'
@@ -115,7 +116,7 @@ export default function ExpensesPage() {
               <option value="amount-asc">Monto (menor)</option>
             </select>
           </div>
-          <button className="btn-primary" onClick={openCreate}>
+          <button className="hidden md:flex btn-primary" onClick={openCreate}>
             <Plus size={16} />
             Nuevo gasto
           </button>
@@ -241,6 +242,8 @@ export default function ExpensesPage() {
           onClose={() => setModalOpen(false)}
         />
       </Modal>
+
+      <FAB onClick={openCreate} color1="#ec4899" color2="#f43f5e" glow="rgba(236,72,153,0.45)" />
 
       <ConfirmDialog
         isOpen={!!deleting}

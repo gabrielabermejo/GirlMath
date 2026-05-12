@@ -9,6 +9,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import LoanForm from './components/LoanForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useLoans } from './hooks/useLoans'
 import { useMarkLoanPaid, useDeleteLoan } from './hooks/useMutateLoans'
 import { Loan } from '../../types'
@@ -73,7 +74,7 @@ export default function LoansPage() {
 
         {/* Toolbar */}
         <div className="flex justify-end">
-          <button className="btn-primary" onClick={() => setModalOpen(true)}>
+          <button className="hidden md:flex btn-primary" onClick={() => setModalOpen(true)}>
             <Plus size={16} />
             Nuevo préstamo
           </button>
@@ -277,6 +278,8 @@ export default function LoansPage() {
           </div>
         )}
       </div>
+
+      <FAB onClick={() => setModalOpen(true)} color1="#f59e0b" color2="#f97316" glow="rgba(245,158,11,0.45)" />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo préstamo">
         <LoanForm onClose={() => setModalOpen(false)} />

@@ -7,6 +7,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import FixedExpenseForm from './components/FixedExpenseForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useFixedExpenses } from './hooks/useFixedExpenses'
 import { useDeleteFixedExpense } from './hooks/useMutateFixedExpense'
 import { FixedExpense, CATEGORY_LABELS, CATEGORY_COLORS } from '../../types'
@@ -70,7 +71,7 @@ export default function FixedExpensesPage() {
 
         {/* Toolbar */}
         <div className="flex justify-end">
-          <button className="btn-primary" onClick={openCreate}>
+          <button className="hidden md:flex btn-primary" onClick={openCreate}>
             <Plus size={16} />
             Agregar gasto fijo
           </button>
@@ -204,6 +205,8 @@ export default function FixedExpensesPage() {
           onClose={() => setModalOpen(false)}
         />
       </Modal>
+
+      <FAB onClick={openCreate} color1="#a855f7" color2="#7c3aed" glow="rgba(168,85,247,0.45)" />
 
       <ConfirmDialog
         isOpen={!!deleting}

@@ -9,6 +9,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import DebtForm from './components/DebtForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useDebts } from './hooks/useDebts'
 import { useMarkDebtPaid, useDeleteDebt } from './hooks/useMutateDebts'
 import { Debt } from '../../types'
@@ -94,7 +95,7 @@ export default function DebtsPage() {
 
         {/* Toolbar */}
         <div className="flex justify-end">
-          <button className="btn-primary" onClick={openCreate}>
+          <button className="hidden md:flex btn-primary" onClick={openCreate}>
             <Plus size={16} />
             Nueva deuda
           </button>
@@ -298,6 +299,8 @@ export default function DebtsPage() {
           </div>
         )}
       </div>
+
+      <FAB onClick={openCreate} color1="#f43f5e" color2="#e11d48" glow="rgba(244,63,94,0.45)" />
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar deuda' : 'Nueva deuda'}>
         <DebtForm initial={editing ?? undefined} onClose={() => setModalOpen(false)} />

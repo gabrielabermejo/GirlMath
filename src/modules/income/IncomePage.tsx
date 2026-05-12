@@ -9,6 +9,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import IncomeForm from './components/IncomeForm'
 import SkeletonRows from '../../components/ui/SkeletonRows'
+import FAB from '../../components/ui/FAB'
 import { useIncomes } from './hooks/useIncomes'
 import { useDeleteIncome } from './hooks/useMutateIncome'
 import { useFilters } from '../../context/FiltersContext'
@@ -95,7 +96,7 @@ export default function IncomePage() {
               <option value="amount-asc">Monto (menor)</option>
             </select>
           </div>
-          <button className="btn-primary" onClick={openCreate}>
+          <button className="hidden md:flex btn-primary" onClick={openCreate}>
             <Plus size={16} />
             Nuevo ingreso
           </button>
@@ -213,6 +214,8 @@ export default function IncomePage() {
           onClose={() => setModalOpen(false)}
         />
       </Modal>
+
+      <FAB onClick={openCreate} color1="#34d399" color2="#10b981" glow="rgba(52,211,153,0.45)" />
 
       <ConfirmDialog
         isOpen={!!deleting}
