@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import LoanForm from './components/LoanForm'
+import SkeletonRows from '../../components/ui/SkeletonRows'
 import { useLoans } from './hooks/useLoans'
 import { useMarkLoanPaid, useDeleteLoan } from './hooks/useMutateLoans'
 import { Loan } from '../../types'
@@ -85,9 +86,7 @@ export default function LoansPage() {
           {/* Mobile swipeable list */}
           <div className="md:hidden card overflow-hidden">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
-              </div>
+              <SkeletonRows count={4} />
             ) : pending.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-2 text-gray-400">
                 <Banknote size={28} />
@@ -95,7 +94,7 @@ export default function LoansPage() {
               </div>
             ) : (
               <div className="divide-y divide-pink-50">
-                {pending.map((loan) => (
+                {pending.map((loan, i) => (
                   <SwipeableRow
                     key={loan.id}
                     actions={[
@@ -104,7 +103,7 @@ export default function LoansPage() {
                       { icon: <Trash2 size={15} color="white" />,       label: 'Eliminar',color: '#a78bfa', onClick: () => setDeleting(loan) },
                     ] satisfies SwipeAction[]}
                   >
-                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                    <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white" style={{ animationDelay: `${i * 35}ms` }}>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">{loan.person_name}</p>
                         <div className="flex items-center gap-2 mt-1">
@@ -130,7 +129,7 @@ export default function LoansPage() {
           <div className="hidden md:block card overflow-hidden">
             {isLoading ? (
               <div className="flex h-32 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+                <div className="h-6 w-6 animate-spin rounded-full border-4 border-violet-200 border-t-violet-500" />
               </div>
             ) : pending.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-2 text-gray-400">
@@ -201,14 +200,14 @@ export default function LoansPage() {
             {/* Mobile swipeable list */}
             <div className="md:hidden card overflow-hidden">
               <div className="divide-y divide-green-50">
-                {paid.map((loan) => (
+                {paid.map((loan, i) => (
                   <SwipeableRow
                     key={loan.id}
                     actions={[
                       { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(loan) },
                     ] satisfies SwipeAction[]}
                   >
-                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white opacity-70">
+                    <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white opacity-70" style={{ animationDelay: `${i * 35}ms` }}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <CheckCircle2 size={12} className="shrink-0 text-emerald-400" />

@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import SavingsForm from './components/SavingsForm'
+import SkeletonRows from '../../components/ui/SkeletonRows'
 import { useSavings } from './hooks/useSavings'
 import { useDeleteSaving } from './hooks/useMutateSavings'
 import { Saving } from '../../types'
@@ -80,9 +81,7 @@ export default function SavingsPage() {
         {/* Mobile swipeable list */}
         <div className="md:hidden card overflow-hidden">
           {isLoading ? (
-            <div className="flex h-32 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
-            </div>
+            <SkeletonRows count={4} />
           ) : records.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">
               <PiggyBank size={32} />
@@ -91,14 +90,14 @@ export default function SavingsPage() {
             </div>
           ) : (
             <div className="divide-y divide-pink-50">
-              {records.map((record) => (
+              {records.map((record, i) => (
                 <SwipeableRow
                   key={record.id}
                   actions={[
                     { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(record) },
                   ] satisfies SwipeAction[]}
                 >
-                  <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white">
+                  <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white" style={{ animationDelay: `${i * 35}ms` }}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <PiggyBank size={12} className="shrink-0 text-pink-400" />
@@ -129,7 +128,7 @@ export default function SavingsPage() {
         <div className="hidden md:block card overflow-hidden">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+              <div className="h-6 w-6 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-500" />
             </div>
           ) : records.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-2 text-gray-400">

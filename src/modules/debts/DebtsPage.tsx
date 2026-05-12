@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import StatCard from '../../components/ui/StatCard'
 import DebtForm from './components/DebtForm'
+import SkeletonRows from '../../components/ui/SkeletonRows'
 import { useDebts } from './hooks/useDebts'
 import { useMarkDebtPaid, useDeleteDebt } from './hooks/useMutateDebts'
 import { Debt } from '../../types'
@@ -106,9 +107,7 @@ export default function DebtsPage() {
           {/* Mobile */}
           <div className="md:hidden card overflow-hidden">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
-              </div>
+              <SkeletonRows count={4} />
             ) : pending.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-2 text-gray-400">
                 <Banknote size={28} />
@@ -116,7 +115,7 @@ export default function DebtsPage() {
               </div>
             ) : (
               <div className="divide-y divide-pink-50">
-                {pending.map((debt) => {
+                {pending.map((debt, i) => {
                   const overdue = isOverdue(debt)
                   const dueMonth = isDueThisMonth(debt)
                   return (
@@ -128,7 +127,7 @@ export default function DebtsPage() {
                         { icon: <Trash2 size={15} color="white" />,       label: 'Eliminar',color: '#a78bfa', onClick: () => setDeleting(debt) },
                       ] satisfies SwipeAction[]}
                     >
-                      <div className={`flex items-center justify-between gap-3 px-4 py-3.5 ${overdue ? 'bg-red-50/40' : 'bg-white'}`}>
+                      <div className={`list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 ${overdue ? 'bg-red-50/40' : 'bg-white'}`} style={{ animationDelay: `${i * 35}ms` }}>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             {overdue && <AlertCircle size={12} className="shrink-0 text-red-400" />}
@@ -165,7 +164,7 @@ export default function DebtsPage() {
           <div className="hidden md:block card overflow-hidden">
             {isLoading ? (
               <div className="flex h-32 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-4 border-pink-200 border-t-pink-500" />
+                <div className="h-6 w-6 animate-spin rounded-full border-4 border-rose-200 border-t-rose-500" />
               </div>
             ) : pending.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center gap-2 text-gray-400">
@@ -239,14 +238,14 @@ export default function DebtsPage() {
             {/* Mobile */}
             <div className="md:hidden card overflow-hidden">
               <div className="divide-y divide-green-50">
-                {paid.map((debt) => (
+                {paid.map((debt, i) => (
                   <SwipeableRow
                     key={debt.id}
                     actions={[
                       { icon: <Trash2 size={15} color="white" />, label: 'Eliminar', color: '#a78bfa', onClick: () => setDeleting(debt) },
                     ] satisfies SwipeAction[]}
                   >
-                    <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-white opacity-65">
+                    <div className="list-item-enter flex items-center justify-between gap-3 px-4 py-3.5 bg-white opacity-65" style={{ animationDelay: `${i * 35}ms` }}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <CheckCircle2 size={12} className="shrink-0 text-emerald-400" />
