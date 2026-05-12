@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Home, LayoutDashboard, TrendingUp, TrendingDown,
   RepeatIcon, HandCoins, Landmark, Sparkles, X,
@@ -8,190 +8,183 @@ import {
 import { useAuth } from '../../context/AuthContext'
 
 const links = [
-  { to: '/',             label: 'Inicio',      icon: Home,            color: '#f472b6', bg: 'rgba(253,242,248,0.95)' },
-  { to: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, color: '#c084fc', bg: 'rgba(250,245,255,0.95)' },
-  { to: '/ingresos',     label: 'Ingresos',    icon: TrendingUp,      color: '#34d399', bg: 'rgba(240,253,244,0.95)' },
-  { to: '/gastos',       label: 'Gastos',      icon: TrendingDown,    color: '#fb7185', bg: 'rgba(255,241,242,0.95)' },
-  { to: '/gastos-fijos', label: 'Fijos',       icon: RepeatIcon,      color: '#a78bfa', bg: 'rgba(245,243,255,0.95)' },
-  { to: '/prestamos',    label: 'Préstamos',   icon: HandCoins,       color: '#f59e0b', bg: 'rgba(255,251,235,0.95)' },
-  { to: '/cuentas',      label: 'Cuentas',     icon: Landmark,        color: '#60a5fa', bg: 'rgba(239,246,255,0.95)' },
-  { to: '/ahorro',       label: 'Ahorros',     icon: PiggyBank,       color: '#ec4899', bg: 'rgba(253,242,248,0.95)' },
-  { to: '/deudas',       label: 'Deudas',      icon: CreditCard,      color: '#f43f5e', bg: 'rgba(255,241,242,0.95)' },
-  { to: '/movimientos',  label: 'Movimientos', icon: ArrowUpDown,     color: '#f472b6', bg: 'rgba(253,242,248,0.95)' },
-  { to: '/calendario',   label: 'Calendario',  icon: CalendarDays,    color: '#2dd4bf', bg: 'rgba(240,253,250,0.95)' },
+  { to: '/',             label: 'Inicio',      icon: Home,            color: '#f472b6', bg: 'rgba(253,242,248,0.96)' },
+  { to: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, color: '#c084fc', bg: 'rgba(250,245,255,0.96)' },
+  { to: '/ingresos',     label: 'Ingresos',    icon: TrendingUp,      color: '#34d399', bg: 'rgba(240,253,244,0.96)' },
+  { to: '/gastos',       label: 'Gastos',      icon: TrendingDown,    color: '#fb7185', bg: 'rgba(255,241,242,0.96)' },
+  { to: '/gastos-fijos', label: 'Fijos',       icon: RepeatIcon,      color: '#a78bfa', bg: 'rgba(245,243,255,0.96)' },
+  { to: '/prestamos',    label: 'Préstamos',   icon: HandCoins,       color: '#f59e0b', bg: 'rgba(255,251,235,0.96)' },
+  { to: '/cuentas',      label: 'Cuentas',     icon: Landmark,        color: '#60a5fa', bg: 'rgba(239,246,255,0.96)' },
+  { to: '/ahorro',       label: 'Ahorros',     icon: PiggyBank,       color: '#ec4899', bg: 'rgba(253,242,248,0.96)' },
+  { to: '/deudas',       label: 'Deudas',      icon: CreditCard,      color: '#f43f5e', bg: 'rgba(255,241,242,0.96)' },
+  { to: '/movimientos',  label: 'Movimientos', icon: ArrowUpDown,     color: '#f472b6', bg: 'rgba(253,242,248,0.96)' },
+  { to: '/calendario',   label: 'Calendario',  icon: CalendarDays,    color: '#2dd4bf', bg: 'rgba(240,253,250,0.96)' },
 ]
 
-const BASE_W   = 54    // chip width px
-const BASE_H   = 66    // chip height px
-const GAP_H    = 9     // horizontal gap between chips
-const GAP_V    = 12    // vertical gap between rows
-const MAX_S    = 1.72  // max scale
-const SIGMA    = 1.18  // gaussian spread (in item units)
+// Arc carousel constants
+const ITEM_W    = 74    // chip width
+const ITEM_H    = 88    // chip height
+const STEP      = 84    // horizontal px per item slot
+const Y_CURVE   = 5     // parabolic arc coefficient (px per dist²)
+const MAX_SCALE = 1.0   // center scale
+const MIN_SCALE = 0.56  // far items scale
+const SCALE_K   = 0.13  // scale drop per item unit away
 
-function dockScale(dist: number) {
-  return 1 + (MAX_S - 1) * Math.exp(-(dist * dist) / (2 * SIGMA * SIGMA))
+function arcScale(dist: number) {
+  return Math.max(MIN_SCALE, MAX_SCALE - Math.abs(dist) * SCALE_K)
+}
+function arcY(dist: number) {
+  return dist * dist * Y_CURVE
+}
+function arcOpacity(dist: number) {
+  return Math.max(0, 1 - Math.abs(dist) * 0.24)
 }
 
-interface Finger { col: number; row: number }
-
-function Dock({ allLinks, onClose }: { allLinks: typeof links; onClose: () => void }) {
+function ArcCarousel({ allLinks, onClose }: { allLinks: typeof links; onClose: () => void }) {
   const navigate  = useNavigate()
-  const ref       = useRef<HTMLDivElement>(null)
-  const hasDragged = useRef(false)
-  const startPt   = useRef({ x: 0, y: 0 })
+  const location  = useLocation()
 
-  const [finger,     setFinger]     = useState<Finger | null>(null)
-  const [isTouching, setIsTouching] = useState(false)
+  const initIdx = Math.max(0, allLinks.findIndex(l =>
+    l.to === '/' ? location.pathname === '/' : location.pathname.startsWith(l.to)
+  ))
 
-  const row1 = allLinks.slice(0, 6)
-  const row2 = allLinks.slice(6)
+  const [snap,       setSnap]       = useState(initIdx)
+  const [drag,       setDrag]       = useState(0)
+  const [isSwiping,  setIsSwiping]  = useState(false)
 
-  function rowWidth(n: number) { return n * BASE_W + (n - 1) * GAP_H }
+  const startX     = useRef(0)
+  const lastX      = useRef(0)
+  const hasMoved   = useRef(false)
 
-  function computeFinger(clientX: number, clientY: number) {
-    const rect = ref.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const relY = clientY - rect.top
-    // row 0 center ≈ BASE_H/2, row 1 center ≈ BASE_H + GAP_V + BASE_H/2
-    const r0cy = BASE_H / 2
-    const r1cy = BASE_H + GAP_V + BASE_H / 2
-    const rowFloat = (relY - r0cy) / (r1cy - r0cy)
-    const nearRow  = rowFloat < 0.5 ? 0 : 1
-    const rowItems = nearRow === 0 ? row1 : row2
-
-    const rw        = rowWidth(rowItems.length)
-    const rowStartX = (rect.width - rw) / 2
-    const relX      = clientX - rect.left
-    const colFloat  = (relX - rowStartX - BASE_W / 2) / (BASE_W + GAP_H)
-
-    setFinger({ col: colFloat, row: rowFloat })
-  }
-
-  function getScale(rowIdx: number, colIdx: number) {
-    if (!finger) return 1
-    const dc = colIdx - finger.col
-    const dr = (rowIdx - finger.row) * 1.4
-    return dockScale(Math.sqrt(dc * dc + dr * dr))
-  }
+  const floatIdx = snap + drag
+  const containerH = ITEM_H + Math.pow(3, 2) * Y_CURVE + 24  // room for arc curve + padding
 
   function onTouchStart(e: React.TouchEvent) {
-    startPt.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    hasDragged.current = false
-    setIsTouching(true)
-    computeFinger(e.touches[0].clientX, e.touches[0].clientY)
+    startX.current = e.touches[0].clientX
+    lastX.current  = e.touches[0].clientX
+    hasMoved.current = false
+    setIsSwiping(true)
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const dx = Math.abs(e.touches[0].clientX - startPt.current.x)
-    const dy = Math.abs(e.touches[0].clientY - startPt.current.y)
-    if (dx > 6 || dy > 6) hasDragged.current = true
-    computeFinger(e.touches[0].clientX, e.touches[0].clientY)
+    const dx = startX.current - e.touches[0].clientX
+    if (Math.abs(dx) > 6) hasMoved.current = true
+    lastX.current = e.touches[0].clientX
+    setDrag(dx / STEP)
   }
 
   function onTouchEnd() {
-    setFinger(null)
-    setIsTouching(false)
-  }
-
-  function tap(to: string) {
-    if (!hasDragged.current) { navigate(to); onClose() }
-  }
-
-  function renderRow(items: typeof links, rowIdx: number) {
-    return (
-      <div style={{ display: 'flex', gap: GAP_H, justifyContent: 'center', alignItems: 'flex-end' }}>
-        {items.map((link, colIdx) => {
-          const s       = getScale(rowIdx, colIdx)
-          const hot     = s > 1.25
-          return (
-            <button
-              key={link.to}
-              onClick={() => tap(link.to)}
-              style={{
-                width: BASE_W,
-                height: BASE_H,
-                flexShrink: 0,
-                borderRadius: 18,
-                background: link.bg,
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: `${hot ? 2 : 1.5}px solid ${link.color}${hot ? '62' : '24'}`,
-                boxShadow: hot
-                  ? `0 12px 36px ${link.color}52, inset 0 1px 0 rgba(255,255,255,0.88)`
-                  : `0 4px 18px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.7)`,
-                transform: `scale(${s})`,
-                transformOrigin: 'center bottom',
-                zIndex: Math.round(s * 10),
-                transition: isTouching
-                  ? 'transform 0.1s ease-out, box-shadow 0.1s ease, border-color 0.1s ease'
-                  : 'transform 0.42s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.32s ease, border-color 0.3s ease',
-                display: 'flex', flexDirection: 'column',
-                alignItems: 'center', justifyContent: 'center', gap: 6,
-                cursor: 'pointer', outline: 'none',
-                position: 'relative',
-              }}
-            >
-              <div style={{
-                width: 34, height: 34, borderRadius: 10,
-                background: `linear-gradient(135deg, ${link.color}${hot ? '38' : '1c'} 0%, ${link.color}${hot ? '55' : '2e'} 100%)`,
-                border: `1px solid ${link.color}35`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: hot ? `0 3px 12px ${link.color}35` : 'none',
-                transition: 'background 0.15s ease, box-shadow 0.15s ease',
-              }}>
-                <link.icon size={16} style={{ color: link.color }} />
-              </div>
-              <span style={{
-                fontSize: 9,
-                fontWeight: hot ? 700 : 600,
-                color: hot ? link.color : '#9ca3af',
-                maxWidth: BASE_W - 6,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                textAlign: 'center',
-                transition: 'color 0.15s ease',
-              }}>
-                {link.label}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-    )
+    // Small velocity boost: overshoot by a fraction of remaining drag
+    const vel   = (startX.current - lastX.current) / STEP
+    const boost = vel * 0.3
+    const raw   = snap + drag + boost
+    const next  = Math.max(0, Math.min(allLinks.length - 1, Math.round(raw)))
+    setIsSwiping(false)
+    setSnap(next)
+    setDrag(0)
   }
 
   return (
     <div
-      ref={ref}
       style={{
+        position: 'relative',
+        width: '100%',
+        height: containerH,
+        overflow: 'visible',
         touchAction: 'none',
         userSelect: 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: GAP_V,
-        padding: '4px 12px 0',
-        alignItems: 'center',
-        width: '100%',
       }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
     >
-      {renderRow(row1, 0)}
-      {renderRow(row2, 1)}
+      {allLinks.map((link, i) => {
+        const dist    = i - floatIdx
+        const absDist = Math.abs(dist)
+        const scale   = arcScale(dist)
+        const ty      = arcY(dist)
+        const opacity = arcOpacity(dist)
+        const tx      = dist * STEP
+        const isCenter = absDist < 0.45
+
+        return (
+          <button
+            key={link.to}
+            onClick={() => { if (!hasMoved.current) { navigate(link.to); onClose() } }}
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              width: ITEM_W,
+              height: ITEM_H,
+              marginLeft: -(ITEM_W / 2),
+              borderRadius: 20,
+              background: link.bg,
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: `${isCenter ? 2 : 1.5}px solid ${link.color}${isCenter ? '66' : '28'}`,
+              boxShadow: isCenter
+                ? `0 10px 32px ${link.color}48, inset 0 1px 0 rgba(255,255,255,0.9)`
+                : `0 4px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)`,
+              transform: `translateX(${tx}px) translateY(${ty}px) scale(${scale})`,
+              transformOrigin: 'center top',
+              opacity,
+              zIndex: Math.round(scale * 10),
+              pointerEvents: opacity > 0.15 ? 'auto' : 'none',
+              transition: isSwiping
+                ? 'none'
+                : 'transform 0.45s cubic-bezier(0.34,1.3,0.64,1), opacity 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 7,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {/* Icon box */}
+            <div style={{
+              width: 38, height: 38, borderRadius: 12,
+              background: `linear-gradient(135deg, ${link.color}${isCenter ? '3a' : '1e'} 0%, ${link.color}${isCenter ? '58' : '30'} 100%)`,
+              border: `1px solid ${link.color}${isCenter ? '48' : '30'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: isCenter ? `0 4px 14px ${link.color}38` : 'none',
+              transition: 'background 0.3s ease, box-shadow 0.3s ease',
+            }}>
+              <link.icon size={18} style={{ color: link.color }} />
+            </div>
+
+            {/* Label */}
+            <span style={{
+              fontSize: 10,
+              fontWeight: isCenter ? 700 : 600,
+              color: isCenter ? link.color : '#6b7280',
+              maxWidth: ITEM_W - 8,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              textAlign: 'center',
+              transition: 'color 0.3s ease',
+            }}>
+              {link.label}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }
 
+// ─── Main export ─────────────────────────────────────────────────────────────
+
 export default function MobileMenu() {
   const [open, setOpen] = useState(false)
-  const { profile } = useAuth()
+  const { profile }     = useAuth()
 
   const allLinks = [
     ...links,
     ...(profile?.role === 'admin'
-      ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, color: '#a78bfa', bg: 'rgba(245,243,255,0.95)' }]
+      ? [{ to: '/admin', label: 'Admin', icon: ShieldCheck, color: '#a78bfa', bg: 'rgba(245,243,255,0.96)' }]
       : []),
   ]
 
@@ -203,11 +196,11 @@ export default function MobileMenu() {
           50%      { box-shadow: 0 8px 28px rgba(236,72,153,0.5), 0 0 0 10px rgba(236,72,153,0.0); }
         }
         .fab-idle { animation: fab-pulse 2.8s ease-in-out infinite; }
-        @keyframes dock-in {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0);    }
+        @keyframes arc-in {
+          from { opacity: 0; transform: translateY(20px) scale(0.96); }
+          to   { opacity: 1; transform: translateY(0)    scale(1);    }
         }
-        .dock-in { animation: dock-in 0.4s cubic-bezier(0.34,1.3,0.64,1) both; }
+        .arc-in { animation: arc-in 0.38s cubic-bezier(0.34,1.3,0.64,1) both; }
       `}</style>
 
       {/* Backdrop */}
@@ -238,17 +231,16 @@ export default function MobileMenu() {
         }}
       />
 
-      {/* Floating dock — no box, chips directly on backdrop */}
+      {/* Arc carousel — no box, chips float on backdrop */}
       {open && (
         <div
-          className="dock-in md:hidden fixed inset-x-0 z-50"
+          className="arc-in md:hidden fixed inset-x-0 z-50"
           style={{
-            bottom: 'calc(76px + max(env(safe-area-inset-bottom, 0px), 0px) + 20px)',
-            display: 'flex',
-            justifyContent: 'center',
+            bottom: 'calc(76px + max(env(safe-area-inset-bottom, 0px), 0px) + 16px)',
+            padding: '0 20px',
           }}
         >
-          <Dock allLinks={allLinks} onClose={() => setOpen(false)} />
+          <ArcCarousel allLinks={allLinks} onClose={() => setOpen(false)} />
         </div>
       )}
 
