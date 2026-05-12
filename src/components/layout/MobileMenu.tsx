@@ -24,7 +24,8 @@ const links = [
 // Arc carousel constants
 const ITEM_W    = 74    // chip width
 const ITEM_H    = 88    // chip height
-const STEP      = 84    // horizontal px per item slot
+const STEP      = 84    // horizontal px per item slot (visual spacing)
+const DRAG_PX   = 48    // px of finger movement = 1 item (sensitivity)
 const Y_CURVE   = 5     // parabolic arc coefficient (px per dist²)
 const MAX_SCALE = 1.0   // center scale
 const MIN_SCALE = 0.56  // far items scale
@@ -53,32 +54,46 @@ function ArcCarousel({ allLinks, onClose }: { allLinks: typeof links; onClose: (
   const [isSwiping,  setIsSwiping]  = useState(false)
 
   const startX     = useRef(0)
-  const lastX      = useRef(0)
   const hasMoved   = useRef(false)
+  // Velocity tracking: store last 80ms of moves
+  const velBuf     = useRef<{ x: number; t: number }[]>([])
 
   const floatIdx = snap + drag
-  const containerH = ITEM_H + Math.pow(3, 2) * Y_CURVE + 24  // room for arc curve + padding
+  const containerH = ITEM_H + Math.pow(3, 2) * Y_CURVE + 24
 
   function onTouchStart(e: React.TouchEvent) {
     startX.current = e.touches[0].clientX
-    lastX.current  = e.touches[0].clientX
     hasMoved.current = false
+    velBuf.current = [{ x: e.touches[0].clientX, t: performance.now() }]
     setIsSwiping(true)
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    const dx = startX.current - e.touches[0].clientX
+    const cx = e.touches[0].clientX
+    const dx = startX.current - cx
     if (Math.abs(dx) > 6) hasMoved.current = true
-    lastX.current = e.touches[0].clientX
-    setDrag(dx / STEP)
+    // Update velocity buffer (keep last 80ms)
+    const now = performance.now()
+    velBuf.current.push({ x: cx, t: now })
+    velBuf.current = velBuf.current.filter(p => now - p.t < 80)
+    setDrag(dx / DRAG_PX)
   }
 
   function onTouchEnd() {
-    // Small velocity boost: overshoot by a fraction of remaining drag
-    const vel   = (startX.current - lastX.current) / STEP
-    const boost = vel * 0.3
-    const raw   = snap + drag + boost
-    const next  = Math.max(0, Math.min(allLinks.length - 1, Math.round(raw)))
+    // Compute velocity from recent samples (px/ms)
+    const buf = velBuf.current
+    let momentum = 0
+    if (buf.length >= 2) {
+      const first = buf[0]
+      const last  = buf[buf.length - 1]
+      const dt    = last.t - first.t
+      if (dt > 0) {
+        const velPxMs = (first.x - last.x) / dt   // px/ms
+        momentum = velPxMs * 160 / DRAG_PX         // project 160ms forward in item units
+      }
+    }
+    const raw  = snap + drag + momentum
+    const next = Math.max(0, Math.min(allLinks.length - 1, Math.round(raw)))
     setIsSwiping(false)
     setSnap(next)
     setDrag(0)
