@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { TrendingUp, TrendingDown, LayoutDashboard, PiggyBank, HandCoins, CreditCard } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useAuth } from '../context/AuthContext'
@@ -16,53 +15,6 @@ function getGreeting() {
   return { text: 'Buenas noches', emoji: '🌙' }
 }
 
-const shortcuts = [
-  { to: '/dashboard',  label: 'Dashboard', icon: LayoutDashboard, color: '#c084fc', bg: 'rgba(245,243,255,0.88)' },
-  { to: '/gastos',     label: 'Gastos',    icon: TrendingDown,    color: '#f472b6', bg: 'rgba(253,242,248,0.88)' },
-  { to: '/ingresos',   label: 'Ingresos',  icon: TrendingUp,      color: '#34d399', bg: 'rgba(240,253,244,0.88)' },
-  { to: '/ahorro',     label: 'Ahorros',   icon: PiggyBank,       color: '#f59e0b', bg: 'rgba(255,251,235,0.88)' },
-  { to: '/prestamos',  label: 'Préstamos', icon: HandCoins,       color: '#60a5fa', bg: 'rgba(239,246,255,0.88)' },
-  { to: '/deudas',     label: 'Deudas',    icon: CreditCard,      color: '#f43f5e', bg: 'rgba(255,241,242,0.88)' },
-]
-
-function ShortcutChip({ to, label, icon: Icon, color, bg }: typeof shortcuts[0]) {
-  const navigate = useNavigate()
-  const [pressed, setPressed] = useState(false)
-
-  return (
-    <button
-      onPointerDown={() => setPressed(true)}
-      onPointerUp={() => { setPressed(false); navigate(to) }}
-      onPointerLeave={() => setPressed(false)}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 5,
-        padding: '10px 12px',
-        borderRadius: 16,
-        background: bg,
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: `1px solid ${color}30`,
-        boxShadow: pressed
-          ? `0 2px 8px ${color}22`
-          : `0 4px 16px ${color}25, inset 0 1px 0 rgba(255,255,255,0.8)`,
-        transform: pressed ? 'scale(0.9)' : 'scale(1)',
-        transition: pressed
-          ? 'transform 0.08s ease, box-shadow 0.08s ease'
-          : 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease',
-        cursor: 'pointer',
-        outline: 'none',
-        minWidth: 62,
-        flex: 1,
-      }}
-    >
-      <Icon size={18} style={{ color }} />
-      <span style={{ fontSize: 10, fontWeight: 600, color: '#6b7280', whiteSpace: 'nowrap' }}>{label}</span>
-    </button>
-  )
-}
 
 export default function HomePage() {
   const { profile } = useAuth()
@@ -86,13 +38,8 @@ export default function HomePage() {
           from { opacity: 0; transform: translateY(28px) scale(0.93); }
           to   { opacity: 1; transform: translateY(0px) scale(1); }
         }
-        @keyframes chip-in {
-          from { opacity: 0; transform: translateY(14px) scale(0.95); }
-          to   { opacity: 1; transform: translateY(0)    scale(1); }
-        }
         .home-card-income  { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s  both; }
         .home-card-expense { animation: card-glow-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.22s both; }
-        .shortcut-row      { animation: chip-in      0.5s  cubic-bezier(0.34,1.3, 0.64,1) 0.35s both; }
       `}</style>
 
       <div
@@ -217,32 +164,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Quick-access shortcuts — docked to bottom */}
-        <div
-          className="shortcut-row absolute inset-x-0 flex justify-center"
-          style={{
-            bottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 16px)',
-            zIndex: 5,
-            padding: '0 20px',
-          }}
-        >
-          <div
-            className="flex gap-2 w-full max-w-sm"
-            style={{
-              padding: '10px 14px',
-              borderRadius: 22,
-              background: 'rgba(255,255,255,0.55)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              border: '1px solid rgba(255,255,255,0.85)',
-              boxShadow: '0 8px 32px rgba(236,72,153,0.1), inset 0 1px 0 rgba(255,255,255,0.9)',
-            }}
-          >
-            {shortcuts.map((s) => (
-              <ShortcutChip key={s.to} {...s} />
-            ))}
-          </div>
-        </div>
       </div>
 
       <Modal isOpen={incomeOpen} onClose={() => setIncomeOpen(false)} title="Nuevo ingreso">
